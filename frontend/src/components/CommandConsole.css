@@ -1,0 +1,252 @@
+.command-console {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0f1419;
+  border-right: 2px solid #2d3139;
+  overflow: hidden;
+}
+
+.console-header {
+  background: #1a1d24;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid #2d3139;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.console-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #4fc3f7;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-badge.pending {
+  background: #9aa0a6;
+  color: #0f1419;
+}
+
+.status-badge.running {
+  background: #4fc3f7;
+  color: #0f1419;
+  animation: pulse 2s infinite;
+}
+
+.status-badge.completed {
+  background: #4caf50;
+  color: white;
+}
+
+.status-badge.failed {
+  background: #f44336;
+  color: white;
+}
+
+.status-badge.awaiting {
+  background: #ff9800;
+  color: white;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.mission-form {
+  padding: 1.5rem;
+  border-bottom: 1px solid #2d3139;
+}
+
+.mission-input {
+  width: 100%;
+  background: #1a1d24;
+  border: 2px solid #2d3139;
+  border-radius: 6px;
+  color: #e8eaed;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.mission-input:focus {
+  outline: none;
+  border-color: #4fc3f7;
+}
+
+.mission-input::placeholder {
+  color: #9aa0a6;
+}
+
+.run-mission-button {
+  width: 100%;
+  background: #4fc3f7;
+  border: none;
+  border-radius: 6px;
+  color: #0f1419;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.run-mission-button:hover:not(:disabled) {
+  background: #29b6f6;
+  transform: translateY(-1px);
+}
+
+.run-mission-button:disabled {
+  background: #2d3139;
+  color: #9aa0a6;
+  cursor: not-allowed;
+}
+
+.mission-info {
+  padding: 1rem 1.5rem;
+  background: #1a1d24;
+  border-bottom: 1px solid #2d3139;
+}
+
+.mission-prompt {
+  margin-bottom: 0.5rem;
+  color: #e8eaed;
+  line-height: 1.5;
+}
+
+.mission-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #9aa0a6;
+}
+
+.timeline-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.timeline-container h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #e8eaed;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timeline-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #9aa0a6;
+  font-style: italic;
+}
+
+.timeline-step {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #1a1d24;
+  border-left: 3px solid;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.timeline-step:hover {
+  transform: translateX(3px);
+}
+
+.timeline-step.observation {
+  border-color: #4fc3f7;
+}
+
+.timeline-step.action {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.05);
+}
+
+.timeline-step.rca {
+  border-color: #9c27b0;
+  background: rgba(156, 39, 176, 0.05);
+}
+
+.timeline-step.remediation {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.step-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  gap: 0.5rem;
+}
+
+.step-type {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+}
+
+.step-type.observation {
+  background: rgba(79, 195, 247, 0.2);
+  color: #4fc3f7;
+}
+
+.step-type.action {
+  background: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+}
+
+.step-type.rca {
+  background: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
+}
+
+.step-type.remediation {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.step-timestamp {
+  font-size: 0.75rem;
+  color: #9aa0a6;
+  white-space: nowrap;
+}
+
+.step-message {
+  color: #e8eaed;
+  line-height: 1.5;
+  word-break: break-word;
+}

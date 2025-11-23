@@ -1,0 +1,120 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #0f1419;
+}
+
+.app-header {
+  background: linear-gradient(135deg, #1a1d24 0%, #2d3139 100%);
+  border-bottom: 3px solid #4fc3f7;
+  padding: 1.5rem 2rem;
+}
+
+.header-content h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #4fc3f7;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+  color: #9aa0a6;
+  font-weight: 400;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.panel-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.left-panel {
+  width: 40%;
+  min-width: 400px;
+}
+
+.right-panel {
+  flex: 1;
+}
+
+.error-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #f44336;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1000;
+}
+
+.error-toast button {
+  background: white;
+  color: #f44336;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s;
+}
+
+.error-toast button:hover {
+  transform: scale(1.05);
+}
+
+.app-footer {
+  background: #1a1d24;
+  border-top: 1px solid #2d3139;
+  padding: 1rem 2rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #9aa0a6;
+}
+
+.app-footer a {
+  color: #4fc3f7;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.app-footer a:hover {
+  color: #29b6f6;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .panel-container {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    width: 100%;
+    min-width: unset;
+    max-height: 50vh;
+  }
+
+  .right-panel {
+    width: 100%;
+  }
+}
