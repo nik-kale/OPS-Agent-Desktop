@@ -6,6 +6,20 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.2-61dafb.svg)](https://reactjs.org/)
 
+## 🎉 Version 2.0 - Production Ready!
+
+**Major updates in v2.0:**
+- ✅ **PostgreSQL + Prisma** - Persistent database storage
+- ✅ **JWT Authentication** - Secure user authentication and RBAC
+- ✅ **WebSocket Support** - Real-time updates (no more polling!)
+- ✅ **Docker Deployment** - Full containerization with docker-compose
+- ✅ **Security Hardening** - Rate limiting, input validation, CORS
+- ✅ **Testing Infrastructure** - Vitest, React Testing Library, E2E tests
+- ✅ **CI/CD Pipeline** - Automated testing and builds via GitHub Actions
+- ✅ **Structured Logging** - Winston with correlation IDs
+
+**📖 [Upgrade Guide](UPGRADE_GUIDE.md)** | **🏗️ [Architecture Docs](ARCHITECTURE.md)**
+
 ---
 
 ## What This Is

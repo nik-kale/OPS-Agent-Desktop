@@ -42,3 +42,27 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+prisma/migrations/
+
+# Secrets and credentials
+*.pem
+*.key
+*.cert
+secrets/
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.cache/

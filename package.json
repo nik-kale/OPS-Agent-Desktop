@@ -17,11 +17,30 @@
     "build:backend": "npm run build --workspace=backend",
     "build:frontend": "npm run build --workspace=frontend",
     "build:mock": "npm run build --workspace=mock-app",
-    "build": "npm run build:backend && npm run build:frontend && npm run build:mock"
+    "build": "npm run build:backend && npm run build:frontend && npm run build:mock",
+    "test": "npm run test --workspace=backend && npm run test --workspace=frontend",
+    "test:watch": "concurrently \"npm run test:watch --workspace=backend\" \"npm run test:watch --workspace=frontend\"",
+    "lint": "npm run lint --workspace=backend && npm run lint --workspace=frontend",
+    "lint:fix": "npm run lint:fix --workspace=backend && npm run lint:fix --workspace=frontend",
+    "format": "npm run format --workspace=backend && npm run format --workspace=frontend",
+    "type-check": "npm run type-check --workspace=backend && npm run type-check --workspace=frontend",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "turbo": "^1.11.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "keywords": [
     "autonomous-operations",
