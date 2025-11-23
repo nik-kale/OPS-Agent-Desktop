@@ -1,0 +1,279 @@
+// Prisma schema for OPS-Agent-Desktop
+// Version 2.0 - Production-ready persistence layer
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication and RBAC
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String?  // Null for OAuth users
+  name          String
+  role          Role     @default(OPERATOR)
+
+  // OAuth fields
+  oauthProvider String?  // 'auth0', 'google', 'github', etc.
+  oauthId       String?  // External user ID from OAuth provider
+
+  // Metadata
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastLoginAt   DateTime?
+  isActive      Boolean  @default(true)
+
+  // Relations
+  missions      Mission[]
+  approvals     Approval[]
+  auditLogs     AuditLog[]
+
+  @@index([email])
+  @@index([oauthProvider, oauthId])
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+// Mission model - core entity
+model Mission {
+  id                   String        @id @default(uuid())
+  prompt               String        @db.Text
+  status               MissionStatus @default(PENDING)
+
+  // Ownership
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Execution metadata
+  startedAt            DateTime?
+  completedAt          DateTime?
+  executionTimeMs      Int?
+
+  // RCA and Remediation
+  rcaSummary           String?       @db.Text
+  remediationProposal  String?       @db.Text
+
+  // Configuration
+  dashboardUrl         String?
+  dashboardType        String?       // 'grafana', 'kibana', 'datadog', etc.
+  priority             Priority      @default(NORMAL)
+
+  // Timestamps
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  // Relations
+  steps                MissionStep[]
+  approvals            Approval[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([priority, status])
+  @@map("missions")
+}
+
+enum MissionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  AWAITING_APPROVAL
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+// Mission steps - detailed execution log
+model MissionStep {
+  id              String          @id @default(uuid())
+  missionId       String
+  mission         Mission         @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  sequenceNumber  Int             // Order within mission
+  type            MissionStepType
+  message         String          @db.Text
+
+  // Screenshot reference
+  screenshotPath  String?
+  screenshotUrl   String?         // S3 URL if using cloud storage
+
+  // Metadata (flexible JSON for additional context)
+  metadata        Json?
+
+  // Timing
+  timestamp       DateTime        @default(now())
+  durationMs      Int?
+
+  @@index([missionId, sequenceNumber])
+  @@map("mission_steps")
+}
+
+enum MissionStepType {
+  OBSERVATION
+  ACTION
+  RCA
+  REMEDIATION
+  ERROR
+  SYSTEM
+}
+
+// Approval workflow
+model Approval {
+  id              String         @id @default(uuid())
+  missionId       String
+  mission         Mission        @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  // Approval details
+  actionType      String         // 'restart', 'scale', 'rollback', etc.
+  actionDetails   Json           // Full context of the action
+  riskLevel       RiskLevel      @default(MEDIUM)
+
+  // Approval state
+  status          ApprovalStatus @default(PENDING)
+  requestedAt     DateTime       @default(now())
+  respondedAt     DateTime?
+
+  // Approver
+  approverId      String?
+  approver        User?          @relation(fields: [approverId], references: [id])
+  approvalNotes   String?        @db.Text
+
+  // Auto-approval
+  autoApproved    Boolean        @default(false)
+  autoApprovalRule String?       // Reference to policy rule that auto-approved
+
+  @@index([missionId])
+  @@index([status])
+  @@index([requestedAt])
+  @@map("approvals")
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// Audit log for compliance and security
+model AuditLog {
+  id          String   @id @default(uuid())
+
+  // Who
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress   String?
+  userAgent   String?
+
+  // What
+  action      String   // 'mission.create', 'approval.grant', 'user.login', etc.
+  resource    String   // 'mission', 'user', 'approval', etc.
+  resourceId  String?  // ID of affected resource
+
+  // Details
+  changes     Json?    // Before/after state for updates
+  metadata    Json?    // Additional context
+
+  // Result
+  success     Boolean  @default(true)
+  errorMessage String? @db.Text
+
+  // When
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
+}
+
+// Mission templates for reusability
+model MissionTemplate {
+  id              String   @id @default(uuid())
+  name            String
+  description     String   @db.Text
+  category        String   // 'database', 'network', 'deployment', 'monitoring'
+
+  // Template definition
+  promptTemplate  String   @db.Text // Can include placeholders like {{service}}
+  dashboardType   String?
+  tags            String[] // For searchability
+
+  // Usage tracking
+  usageCount      Int      @default(0)
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isActive        Boolean  @default(true)
+
+  @@index([category])
+  @@index([isActive])
+  @@map("mission_templates")
+}
+
+// Configuration for dashboard adapters
+model DashboardConfig {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  type            String   // 'grafana', 'kibana', 'datadog', etc.
+  baseUrl         String
+
+  // Credentials (encrypted)
+  credentialsEncrypted String? @db.Text
+
+  // Configuration
+  config          Json?    // Type-specific configuration
+
+  // Health
+  isActive        Boolean  @default(true)
+  lastHealthCheck DateTime?
+  healthStatus    String?  // 'healthy', 'degraded', 'down'
+
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([type])
+  @@index([isActive])
+  @@map("dashboard_configs")
+}
+
+// Refresh tokens for JWT authentication
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
