@@ -1,0 +1,37 @@
+{
+  "name": "ops-agent-desktop",
+  "version": "0.1.0",
+  "description": "A visual mission control for AI-powered SRE and support agents",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "mock-app"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm install --workspace=backend && npm install --workspace=frontend && npm install --workspace=mock-app",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:mock": "npm run dev --workspace=mock-app",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:mock\"",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:mock": "npm run build --workspace=mock-app",
+    "build": "npm run build:backend && npm run build:frontend && npm run build:mock"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "autonomous-operations",
+    "sre",
+    "devops",
+    "ai-agents",
+    "browser-automation",
+    "mission-control",
+    "incident-response"
+  ],
+  "author": "Nik Kale",
+  "license": "MIT"
+}
