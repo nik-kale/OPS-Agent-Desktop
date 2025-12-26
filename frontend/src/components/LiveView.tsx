@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Mission } from '../types/mission';
 import './LiveView.css';
 
@@ -6,7 +7,7 @@ interface LiveViewProps {
   latestScreenshot: string | null;
 }
 
-export function LiveView({ mission, latestScreenshot }: LiveViewProps) {
+export const LiveView = memo(function LiveView({ mission, latestScreenshot }: LiveViewProps) {
   return (
     <div className="live-view">
       <div className="live-view-header">
@@ -79,4 +80,4 @@ export function LiveView({ mission, latestScreenshot }: LiveViewProps) {
       )}
     </div>
   );
-}
+});
