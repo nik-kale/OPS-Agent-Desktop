@@ -43,6 +43,9 @@ export interface Mission {
 
 export interface CreateMissionRequest {
   prompt: string;
+  dashboardUrl?: string;
+  dashboardType?: string;
+  priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL';
 }
 
 export interface CreateMissionResponse {
