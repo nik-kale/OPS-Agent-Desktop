@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { CommandConsole } from './components/CommandConsole';
 import { LiveView } from './components/LiveView';
 import { useMission } from './hooks/useMission';
@@ -17,7 +17,7 @@ function App() {
     isUsingPolling,
   } = useMission(currentMissionId);
 
-  const handleSubmitMission = async (prompt: string) => {
+  const handleSubmitMission = useCallback(async (prompt: string) => {
     setIsSubmitting(true);
     try {
       const response = await api.createMission(prompt);
@@ -28,7 +28,7 @@ function App() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, []);
 
   return (
     <div className="app">

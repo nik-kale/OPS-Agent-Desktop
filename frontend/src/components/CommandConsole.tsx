@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { Mission, MissionStepType, MissionStatus } from '../types/mission';
 import { ConnectionStatus } from './ConnectionStatus';
 import { ConnectionStatus as Status } from '../hooks/useMission';
@@ -12,7 +12,7 @@ interface CommandConsoleProps {
   isUsingPolling?: boolean;
 }
 
-export function CommandConsole({
+export const CommandConsole = memo(function CommandConsole({
   mission,
   onSubmitMission,
   isSubmitting,
@@ -21,15 +21,18 @@ export function CommandConsole({
 }: CommandConsoleProps) {
   const [prompt, setPrompt] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (prompt.trim() && !isSubmitting) {
-      onSubmitMission(prompt.trim());
-      setPrompt('');
-    }
-  };
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (prompt.trim() && !isSubmitting) {
+        onSubmitMission(prompt.trim());
+        setPrompt('');
+      }
+    },
+    [prompt, isSubmitting, onSubmitMission]
+  );
 
-  const getStepIcon = (type: MissionStepType): string => {
+  const getStepIcon = useCallback((type: MissionStepType): string => {
     switch (type) {
       case MissionStepType.OBSERVATION:
         return '👁️';
@@ -42,9 +45,9 @@ export function CommandConsole({
       default:
         return '•';
     }
-  };
+  }, []);
 
-  const getStatusBadge = (status: MissionStatus) => {
+  const getStatusBadge = useCallback((status: MissionStatus) => {
     const badges = {
       [MissionStatus.PENDING]: { label: 'PENDING', className: 'pending' },
       [MissionStatus.RUNNING]: { label: 'RUNNING', className: 'running' },
@@ -59,12 +62,22 @@ export function CommandConsole({
     const badge = badges[status] || { label: status, className: '' };
 
     return <span className={`status-badge ${badge.className}`}>{badge.label}</span>;
-  };
+  }, []);
 
-  const formatTimestamp = (timestamp: string): string => {
+  const formatTimestamp = useCallback((timestamp: string): string => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString();
-  };
+  }, []);
+
+  // Memoize sorted/processed steps to avoid recalculation on every render
+  const sortedSteps = useMemo(() => {
+    if (!mission || !mission.steps) return [];
+    return [...mission.steps].sort((a, b) => {
+      const aTime = new Date(a.timestamp).getTime();
+      const bTime = new Date(b.timestamp).getTime();
+      return aTime - bTime;
+    });
+  }, [mission?.steps]);
 
   return (
     <div className="command-console">
@@ -109,8 +122,8 @@ export function CommandConsole({
       <div className="timeline-container">
         <h3>Mission Timeline</h3>
         <div className="timeline">
-          {mission && mission.steps.length > 0 ? (
-            mission.steps.map((step) => (
+          {sortedSteps.length > 0 ? (
+            sortedSteps.map((step) => (
               <div key={step.id} className={`timeline-step ${step.type.toLowerCase()}`}>
                 <div className="step-icon">{getStepIcon(step.type)}</div>
                 <div className="step-content">
@@ -135,4 +148,4 @@ export function CommandConsole({
       </div>
     </div>
   );
-}
+});
