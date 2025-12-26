@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { missionService } from '../missions/missionService';
-import { browserAgent } from '../browser/browserAgent';
 import { CreateMissionRequest, CreateMissionResponse } from '../types/mission';
+import { addMissionToQueue, getQueueStatus, getJobDetails } from '../queue/missionQueue';
 
 const router = Router();
 
@@ -19,16 +19,14 @@ router.post('/missions', async (req: Request, res: Response) => {
 
     const mission = missionService.createMission(prompt);
 
-    // Execute mission asynchronously (don't await - let it run in background)
-    browserAgent.executeMission(mission.id, prompt).catch((error) => {
-      console.error(`Mission ${mission.id} execution failed:`, error);
-    });
+    // Add mission to queue for concurrent execution
+    await addMissionToQueue(mission.id, prompt);
 
     const response: CreateMissionResponse = {
       missionId: mission.id,
     };
 
-    res.json(response);
+    res.status(201).json(response);
   } catch (error) {
     console.error('Error creating mission:', error);
     res.status(500).json({ error: 'Failed to create mission' });
@@ -99,6 +97,85 @@ router.get('/missions/:id', (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error getting mission:', error);
     res.status(500).json({ error: 'Failed to get mission' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/queue/status:
+ *   get:
+ *     summary: Get mission queue status
+ *     description: Returns queue metrics and status
+ *     tags: [Missions]
+ *     responses:
+ *       200:
+ *         description: Queue status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: object
+ *                   properties:
+ *                     waiting:
+ *                       type: number
+ *                     active:
+ *                       type: number
+ *                     completed:
+ *                       type: number
+ *                     failed:
+ *                       type: number
+ *                     delayed:
+ *                       type: number
+ *                     workers:
+ *                       type: number
+ *                     concurrency:
+ *                       type: number
+ */
+router.get('/queue/status', async (req: Request, res: Response) => {
+  try {
+    const status = await getQueueStatus();
+    res.json({ status });
+  } catch (error) {
+    console.error('Error getting queue status:', error);
+    res.status(500).json({ error: 'Failed to get queue status' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/queue/job/{jobId}:
+ *   get:
+ *     summary: Get job details and position in queue
+ *     description: Returns job status, position, and progress
+ *     tags: [Missions]
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Job/Mission ID
+ *     responses:
+ *       200:
+ *         description: Job details retrieved
+ *       404:
+ *         description: Job not found
+ */
+router.get('/queue/job/:jobId', async (req: Request, res: Response) => {
+  try {
+    const { jobId } = req.params;
+    const job = await getJobDetails(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    res.json({ job });
+  } catch (error) {
+    console.error('Error getting job details:', error);
+    res.status(500).json({ error: 'Failed to get job details' });
   }
 });
 
