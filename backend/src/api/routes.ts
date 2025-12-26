@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { missionService } from '../missions/missionService';
 import { browserAgent } from '../browser/browserAgent';
 import { CreateMissionRequest, CreateMissionResponse } from '../types/mission';
+import { missionRateLimiter } from '../middleware/securityMiddleware';
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const router = Router();
  * POST /api/missions
  * Create a new mission and begin execution.
  */
-router.post('/missions', async (req: Request, res: Response) => {
+router.post('/missions', missionRateLimiter, async (req: Request, res: Response) => {
   try {
     const { prompt } = req.body as CreateMissionRequest;
 
