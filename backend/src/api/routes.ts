@@ -6,8 +6,37 @@ import { CreateMissionRequest, CreateMissionResponse } from '../types/mission';
 const router = Router();
 
 /**
- * POST /api/missions
- * Create a new mission and begin execution.
+ * @openapi
+ * /api/missions:
+ *   post:
+ *     summary: Create a new mission
+ *     description: Creates a new autonomous ops mission and begins execution in the background
+ *     tags: [Missions]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateMissionRequest'
+ *     responses:
+ *       200:
+ *         description: Mission created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CreateMissionResponse'
+ *       400:
+ *         description: Invalid request (missing or invalid prompt)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/missions', async (req: Request, res: Response) => {
   try {
@@ -36,10 +65,39 @@ router.post('/missions', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/missions/:id/stream
- * Get current state of a mission (polling endpoint).
- * For MVP, this returns the full mission state.
- * TODO: Implement WebSocket for real-time streaming.
+ * @openapi
+ * /api/missions/{id}/stream:
+ *   get:
+ *     summary: Get mission state with latest screenshot
+ *     description: Returns the current mission state and latest screenshot (polling endpoint)
+ *     tags: [Missions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Mission ID
+ *     responses:
+ *       200:
+ *         description: Mission state retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/MissionStreamResponse'
+ *       404:
+ *         description: Mission not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/missions/:id/stream', (req: Request, res: Response) => {
   try {
@@ -69,8 +127,30 @@ router.get('/missions/:id/stream', (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/missions
- * List all missions (for debugging).
+ * @openapi
+ * /api/missions:
+ *   get:
+ *     summary: List all missions
+ *     description: Returns a list of all missions (for debugging and monitoring)
+ *     tags: [Missions]
+ *     responses:
+ *       200:
+ *         description: List of missions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 missions:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Mission'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/missions', (req: Request, res: Response) => {
   try {
@@ -83,8 +163,42 @@ router.get('/missions', (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/missions/:id
- * Get a specific mission.
+ * @openapi
+ * /api/missions/{id}:
+ *   get:
+ *     summary: Get a specific mission
+ *     description: Returns detailed information about a specific mission
+ *     tags: [Missions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Mission ID
+ *     responses:
+ *       200:
+ *         description: Mission retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mission:
+ *                   $ref: '#/components/schemas/Mission'
+ *       404:
+ *         description: Mission not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/missions/:id', (req: Request, res: Response) => {
   try {
