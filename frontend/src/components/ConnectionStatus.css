@@ -1,0 +1,92 @@
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background-color: rgba(0, 0, 0, 0.1);
+  user-select: none;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-label {
+  font-weight: 500;
+}
+
+/* Status-specific styles */
+.status-connected {
+  color: #10b981;
+}
+
+.status-connected .status-indicator {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.status-connecting,
+.status-reconnecting {
+  color: #f59e0b;
+}
+
+.status-connecting .status-indicator,
+.status-reconnecting .status-indicator {
+  background-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+  animation: pulse 1s infinite;
+}
+
+.status-disconnected {
+  color: #6b7280;
+}
+
+.status-disconnected .status-indicator {
+  background-color: #6b7280;
+  box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.2);
+  animation: none;
+}
+
+.status-error {
+  color: #ef4444;
+}
+
+.status-error .status-indicator {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  animation: pulse 0.5s infinite;
+}
+
+.status-polling {
+  color: #3b82f6;
+}
+
+.status-polling .status-indicator {
+  background-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  animation: pulse 1.5s infinite;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .connection-status {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+

@@ -1,17 +1,23 @@
 import { useState } from 'react';
 import { Mission, MissionStepType, MissionStatus } from '../types/mission';
+import { ConnectionStatus } from './ConnectionStatus';
+import { ConnectionStatus as Status } from '../hooks/useMission';
 import './CommandConsole.css';
 
 interface CommandConsoleProps {
   mission: Mission | null;
   onSubmitMission: (prompt: string) => void;
   isSubmitting: boolean;
+  connectionStatus?: Status;
+  isUsingPolling?: boolean;
 }
 
 export function CommandConsole({
   mission,
   onSubmitMission,
   isSubmitting,
+  connectionStatus = Status.DISCONNECTED,
+  isUsingPolling = false,
 }: CommandConsoleProps) {
   const [prompt, setPrompt] = useState('');
 
@@ -64,7 +70,10 @@ export function CommandConsole({
     <div className="command-console">
       <div className="console-header">
         <h2>🎯 Command Console</h2>
-        {mission && getStatusBadge(mission.status)}
+        <div className="console-header-right">
+          <ConnectionStatus status={connectionStatus} isUsingPolling={isUsingPolling} />
+          {mission && getStatusBadge(mission.status)}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mission-form">

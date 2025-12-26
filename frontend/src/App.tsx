@@ -9,7 +9,13 @@ function App() {
   const [currentMissionId, setCurrentMissionId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { mission, latestScreenshot, error } = useMission(currentMissionId);
+  const {
+    mission,
+    latestScreenshot,
+    error,
+    connectionStatus,
+    isUsingPolling,
+  } = useMission(currentMissionId);
 
   const handleSubmitMission = async (prompt: string) => {
     setIsSubmitting(true);
@@ -42,6 +48,8 @@ function App() {
               mission={mission}
               onSubmitMission={handleSubmitMission}
               isSubmitting={isSubmitting}
+              connectionStatus={connectionStatus}
+              isUsingPolling={isUsingPolling}
             />
           </div>
 
