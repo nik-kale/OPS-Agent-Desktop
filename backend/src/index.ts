@@ -12,10 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Serve screenshots as static files
-app.use('/screenshots', express.static(path.join(__dirname, '../screenshots')));
-
-// API routes
+// API routes (includes protected screenshot endpoint)
 app.use('/api', apiRoutes);
 
 // Health check
@@ -26,7 +23,6 @@ app.get('/health', (req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Ops-Agent-Desktop Backend running on http://localhost:${PORT}`);
-  console.log(`📸 Screenshots available at http://localhost:${PORT}/screenshots`);
   console.log(`🔍 API docs: http://localhost:${PORT}/api`);
 });
 

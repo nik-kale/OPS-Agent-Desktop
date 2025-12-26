@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express';
 import { missionService } from '../missions/missionService';
 import { browserAgent } from '../browser/browserAgent';
 import { CreateMissionRequest, CreateMissionResponse } from '../types/mission';
+import path from 'path';
+import fs from 'fs';
 
 const router = Router();
 
@@ -59,7 +61,7 @@ router.get('/missions/:id/stream', (req: Request, res: Response) => {
     res.json({
       mission,
       latestScreenshot: latestScreenshot
-        ? `/screenshots/${latestScreenshot}`
+        ? `/api/screenshots/${id}/${latestScreenshot}`
         : undefined,
     });
   } catch (error) {
@@ -99,6 +101,52 @@ router.get('/missions/:id', (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error getting mission:', error);
     res.status(500).json({ error: 'Failed to get mission' });
+  }
+});
+
+/**
+ * GET /api/screenshots/:missionId/:filename
+ * Get a screenshot for a specific mission.
+ * Protected endpoint - validates mission exists before serving screenshot.
+ */
+router.get('/screenshots/:missionId/:filename', (req: Request, res: Response) => {
+  try {
+    const { missionId, filename } = req.params;
+
+    // Validate mission exists
+    const mission = missionService.getMission(missionId);
+    if (!mission) {
+      return res.status(404).json({ error: 'Mission not found' });
+    }
+
+    // Validate filename belongs to this mission
+    const stepWithScreenshot = mission.steps.find(
+      (step) => step.screenshotPath === filename
+    );
+
+    if (!stepWithScreenshot) {
+      return res.status(403).json({ error: 'Screenshot not found for this mission' });
+    }
+
+    // Construct safe file path
+    const screenshotsDir = path.join(__dirname, '../../screenshots');
+    const filepath = path.join(screenshotsDir, filename);
+
+    // Prevent directory traversal attacks
+    if (!filepath.startsWith(screenshotsDir)) {
+      return res.status(403).json({ error: 'Invalid file path' });
+    }
+
+    // Check if file exists
+    if (!fs.existsSync(filepath)) {
+      return res.status(404).json({ error: 'Screenshot file not found' });
+    }
+
+    // Serve the file
+    res.sendFile(filepath);
+  } catch (error) {
+    console.error('Error serving screenshot:', error);
+    res.status(500).json({ error: 'Failed to serve screenshot' });
   }
 });
 
