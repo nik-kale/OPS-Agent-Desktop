@@ -69,9 +69,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {this.state.error && (
               <div className="error-details">
                 <h3>Error Details:</h3>
-                <pre className="error-stack">
-                  {this.state.error.toString()}
-                </pre>
+                <pre className="error-stack">{this.state.error.toString()}</pre>
               </div>
             )}
 
@@ -98,4 +96,3 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-

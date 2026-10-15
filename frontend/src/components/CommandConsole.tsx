@@ -130,21 +130,15 @@ export const CommandConsole = memo(function CommandConsole({
                 <div className="step-icon">{getStepIcon(step.type)}</div>
                 <div className="step-content">
                   <div className="step-header">
-                    <span className={`step-type ${step.type.toLowerCase()}`}>
-                      {step.type}
-                    </span>
-                    <span className="step-timestamp">
-                      {formatTimestamp(step.timestamp)}
-                    </span>
+                    <span className={`step-type ${step.type.toLowerCase()}`}>{step.type}</span>
+                    <span className="step-timestamp">{formatTimestamp(step.timestamp)}</span>
                   </div>
                   <div className="step-message">{step.message}</div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="timeline-empty">
-              No active mission. Enter a prompt above to begin.
-            </div>
+            <div className="timeline-empty">No active mission. Enter a prompt above to begin.</div>
           )}
         </div>
       </div>

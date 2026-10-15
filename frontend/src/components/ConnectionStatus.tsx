@@ -69,4 +69,3 @@ export const ConnectionStatus = ({ status, isUsingPolling }: ConnectionStatusPro
     </div>
   );
 };
-

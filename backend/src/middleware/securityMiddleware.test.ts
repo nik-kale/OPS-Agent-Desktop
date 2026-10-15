@@ -62,11 +62,7 @@ describe('Security Middleware', () => {
 
     it('should handle arrays', () => {
       mockReq.body = {
-        tags: [
-          'tag1',
-          '<script>evil</script>tag2',
-          'tag3<script>bad</script>',
-        ],
+        tags: ['tag1', '<script>evil</script>tag2', 'tag3<script>bad</script>'],
       };
 
       sanitizeInput(mockReq as Request, mockRes as Response, nextFn);
@@ -329,4 +325,3 @@ describe('Security Middleware', () => {
     });
   });
 });
-

@@ -69,9 +69,7 @@ router.get('/missions/:id/stream', (req: Request, res: Response) => {
 
     res.json({
       mission,
-      latestScreenshot: latestScreenshot
-        ? `/screenshots/${latestScreenshot}`
-        : undefined,
+      latestScreenshot: latestScreenshot ? `/screenshots/${latestScreenshot}` : undefined,
     });
   } catch (error) {
     console.error('Error streaming mission:', error);

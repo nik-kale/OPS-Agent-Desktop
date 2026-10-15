@@ -110,11 +110,7 @@ export class BrowserAgent {
   }
 
   private async navigateToDashboard(page: Page, missionId: string): Promise<void> {
-    missionService.addStep(
-      missionId,
-      MissionStepType.OBSERVATION,
-      'Opening Ops Dashboard...'
-    );
+    missionService.addStep(missionId, MissionStepType.OBSERVATION, 'Opening Ops Dashboard...');
 
     // TODO: Replace with actual dashboard URL (Grafana, Datadog, etc.)
     // For MVP, using local mock-app
@@ -152,15 +148,11 @@ export class BrowserAgent {
   }
 
   private async navigateToLogs(page: Page, missionId: string): Promise<void> {
-    missionService.addStep(
-      missionId,
-      MissionStepType.OBSERVATION,
-      'Navigating to logs page...'
-    );
+    missionService.addStep(missionId, MissionStepType.OBSERVATION, 'Navigating to logs page...');
 
     // Click on "Logs" link in mock app
     const logsLink = page.locator('text=Logs');
-    if (await logsLink.count() > 0) {
+    if ((await logsLink.count()) > 0) {
       await logsLink.click();
       await page.waitForLoadState('networkidle');
     }
@@ -283,7 +275,7 @@ export class BrowserAgent {
 
     // Look for "Restart Service" button
     const restartButton = page.locator('button:has-text("Restart Service")');
-    if (await restartButton.count() > 0) {
+    if ((await restartButton.count()) > 0) {
       await restartButton.click();
       await page.waitForTimeout(500);
 
@@ -307,11 +299,7 @@ export class BrowserAgent {
   /**
    * Capture and save a screenshot.
    */
-  private async captureScreenshot(
-    page: Page,
-    missionId: string,
-    label: string
-  ): Promise<string> {
+  private async captureScreenshot(page: Page, missionId: string, label: string): Promise<string> {
     const timestamp = Date.now();
     const filename = `${missionId}_${label}_${timestamp}.png`;
     const filepath = path.join(this.screenshotsDir, filename);

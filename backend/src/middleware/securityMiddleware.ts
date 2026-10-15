@@ -216,9 +216,8 @@ export const errorHandler = (
   });
 
   // Don't leak error details in production
-  const message = config.nodeEnv === 'production'
-    ? 'An error occurred processing your request'
-    : error.message;
+  const message =
+    config.nodeEnv === 'production' ? 'An error occurred processing your request' : error.message;
 
   res.status(500).json({
     error: message,

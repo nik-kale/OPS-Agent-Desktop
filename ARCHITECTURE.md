@@ -108,45 +108,45 @@ OPS-Agent-Desktop v2.0 is a production-ready platform for AI-powered autonomous 
 
 ### Frontend
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Framework** | React 18.2 | UI component library |
-| **Build Tool** | Vite 5.0 | Fast dev server and bundler |
-| **Language** | TypeScript 5.3 | Type-safe development |
-| **WebSocket** | Socket.io-client | Real-time updates |
-| **Validation** | Zod | Client-side input validation |
-| **Sanitization** | DOMPurify | XSS prevention |
-| **Testing** | Vitest + React Testing Library | Unit and component tests |
-| **Linting** | ESLint + Prettier | Code quality |
+| Component        | Technology                     | Purpose                      |
+| ---------------- | ------------------------------ | ---------------------------- |
+| **Framework**    | React 18.2                     | UI component library         |
+| **Build Tool**   | Vite 5.0                       | Fast dev server and bundler  |
+| **Language**     | TypeScript 5.3                 | Type-safe development        |
+| **WebSocket**    | Socket.io-client               | Real-time updates            |
+| **Validation**   | Zod                            | Client-side input validation |
+| **Sanitization** | DOMPurify                      | XSS prevention               |
+| **Testing**      | Vitest + React Testing Library | Unit and component tests     |
+| **Linting**      | ESLint + Prettier              | Code quality                 |
 
 ### Backend
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Runtime** | Node.js 18+ | JavaScript runtime |
-| **Framework** | Express 4.18 | Web server |
-| **Language** | TypeScript 5.3 | Type-safe development |
-| **Database** | PostgreSQL 16 | Primary data store |
-| **ORM** | Prisma 5.8 | Type-safe database access |
-| **Cache** | Redis 7 | Session and cache store |
-| **Queue** | BullMQ | Job queue (future) |
-| **WebSocket** | Socket.io | Real-time communication |
-| **Auth** | JWT + bcrypt | Authentication |
-| **Automation** | Playwright | Browser automation |
-| **Logging** | Winston | Structured logging |
-| **Validation** | Zod | Input validation |
-| **Security** | Helmet, express-rate-limit | Security middleware |
-| **Testing** | Vitest + Supertest | Unit and integration tests |
+| Component      | Technology                 | Purpose                    |
+| -------------- | -------------------------- | -------------------------- |
+| **Runtime**    | Node.js 18+                | JavaScript runtime         |
+| **Framework**  | Express 4.18               | Web server                 |
+| **Language**   | TypeScript 5.3             | Type-safe development      |
+| **Database**   | PostgreSQL 16              | Primary data store         |
+| **ORM**        | Prisma 5.8                 | Type-safe database access  |
+| **Cache**      | Redis 7                    | Session and cache store    |
+| **Queue**      | BullMQ                     | Job queue (future)         |
+| **WebSocket**  | Socket.io                  | Real-time communication    |
+| **Auth**       | JWT + bcrypt               | Authentication             |
+| **Automation** | Playwright                 | Browser automation         |
+| **Logging**    | Winston                    | Structured logging         |
+| **Validation** | Zod                        | Input validation           |
+| **Security**   | Helmet, express-rate-limit | Security middleware        |
+| **Testing**    | Vitest + Supertest         | Unit and integration tests |
 
 ### Infrastructure
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Containerization** | Docker + Docker Compose | Deployment |
-| **Reverse Proxy** | Nginx | Static file serving, proxying |
-| **Object Storage** | MinIO (S3-compatible) | Screenshot storage |
-| **CI/CD** | GitHub Actions | Automated testing and builds |
-| **Observability** | OpenTelemetry (future) | Distributed tracing |
+| Component            | Technology              | Purpose                       |
+| -------------------- | ----------------------- | ----------------------------- |
+| **Containerization** | Docker + Docker Compose | Deployment                    |
+| **Reverse Proxy**    | Nginx                   | Static file serving, proxying |
+| **Object Storage**   | MinIO (S3-compatible)   | Screenshot storage            |
+| **CI/CD**            | GitHub Actions          | Automated testing and builds  |
+| **Observability**    | OpenTelemetry (future)  | Distributed tracing           |
 
 ---
 
@@ -157,6 +157,7 @@ OPS-Agent-Desktop v2.0 is a production-ready platform for AI-powered autonomous 
 **Purpose:** Separate data access logic from business logic
 
 **Implementation:**
+
 ```typescript
 // Repository encapsulates database operations
 export class MissionRepository {
@@ -180,6 +181,7 @@ export class MissionService {
 ```
 
 **Benefits:**
+
 - Testable (can mock repository)
 - Centralized data access
 - Easy to switch databases
@@ -189,19 +191,21 @@ export class MissionService {
 **Purpose:** Composable request processing
 
 **Implementation:**
+
 ```typescript
-app.use(helmet());                    // Security headers
-app.use(cors());                      // CORS validation
-app.use(express.json());              // JSON parsing
-app.use(requestLogger);               // Logging
-app.use(generalRateLimiter);          // Rate limiting
-app.use(requireAuth);                 // Authentication
-app.use(requireRole('OPERATOR'));     // Authorization
-app.use(routes);                      // Route handlers
-app.use(errorHandler);                // Error handling
+app.use(helmet()); // Security headers
+app.use(cors()); // CORS validation
+app.use(express.json()); // JSON parsing
+app.use(requestLogger); // Logging
+app.use(generalRateLimiter); // Rate limiting
+app.use(requireAuth); // Authentication
+app.use(requireRole('OPERATOR')); // Authorization
+app.use(routes); // Route handlers
+app.use(errorHandler); // Error handling
 ```
 
 **Benefits:**
+
 - Separation of concerns
 - Reusable middleware
 - Clear request flow
@@ -211,6 +215,7 @@ app.use(errorHandler);                // Error handling
 **Purpose:** Real-time, bi-directional communication
 
 **Implementation:**
+
 ```typescript
 // Server emits events
 wsServer.emitMissionUpdate(missionId, mission);
@@ -222,6 +227,7 @@ socket.on('mission:update', handleUpdate);
 ```
 
 **Benefits:**
+
 - Low latency (no polling)
 - Efficient resource usage
 - Scalable (can use Redis adapter)
@@ -231,11 +237,13 @@ socket.on('mission:update', handleUpdate);
 **Purpose:** Business logic encapsulation
 
 **Layers:**
+
 1. **Controllers** - HTTP request/response handling
 2. **Services** - Business logic
 3. **Repositories** - Data access
 
 **Example:**
+
 ```typescript
 // Controller
 router.post('/missions', async (req, res) => {
@@ -258,6 +266,7 @@ class MissionService {
 **Purpose:** Environment-based configuration
 
 **Implementation:**
+
 ```typescript
 // Validated configuration from .env
 export const config = configSchema.parse({
@@ -268,6 +277,7 @@ export const config = configSchema.parse({
 ```
 
 **Benefits:**
+
 - Type-safe configuration
 - Validation on startup
 - Single source of truth
@@ -382,11 +392,13 @@ export const config = configSchema.parse({
 ### Defense in Depth
 
 **Layer 1: Network**
+
 - Docker network isolation
 - Firewall rules (production)
 - HTTPS/TLS encryption
 
 **Layer 2: Application**
+
 - Helmet (security headers)
 - CORS (origin validation)
 - Rate limiting (DDoS protection)
@@ -394,37 +406,41 @@ export const config = configSchema.parse({
 - XSS protection (DOMPurify)
 
 **Layer 3: Authentication**
+
 - JWT with strong secrets (32+ chars)
 - Refresh token rotation
 - Password hashing (bcrypt, 12 rounds)
 - OAuth 2.0 support
 
 **Layer 4: Authorization**
+
 - Role-based access control (RBAC)
 - Resource ownership checks
 - Admin-only endpoints
 
 **Layer 5: Data**
+
 - Encrypted database connections
 - Secure credential storage
 - Audit logging (immutable)
 
 ### Threat Model
 
-| Threat | Mitigation |
-|--------|-----------|
-| **SQL Injection** | Prisma parameterized queries |
-| **XSS** | DOMPurify sanitization + CSP headers |
-| **CSRF** | CORS + SameSite cookies |
-| **Brute Force** | Rate limiting (5 attempts/15min) |
-| **Token Theft** | Short-lived JWTs + refresh rotation |
-| **MITM** | HTTPS/TLS + HSTS headers |
-| **DoS** | Rate limiting + request size limits |
-| **Session Hijacking** | Secure cookies + JWT expiration |
+| Threat                | Mitigation                           |
+| --------------------- | ------------------------------------ |
+| **SQL Injection**     | Prisma parameterized queries         |
+| **XSS**               | DOMPurify sanitization + CSP headers |
+| **CSRF**              | CORS + SameSite cookies              |
+| **Brute Force**       | Rate limiting (5 attempts/15min)     |
+| **Token Theft**       | Short-lived JWTs + refresh rotation  |
+| **MITM**              | HTTPS/TLS + HSTS headers             |
+| **DoS**               | Rate limiting + request size limits  |
+| **Session Hijacking** | Secure cookies + JWT expiration      |
 
 ### Audit Logging
 
 **All actions logged:**
+
 - User authentication (login, logout, failed attempts)
 - Mission creation and updates
 - Approval decisions
@@ -432,6 +448,7 @@ export const config = configSchema.parse({
 - Configuration changes
 
 **Log fields:**
+
 - Timestamp (ISO 8601)
 - User ID
 - IP address
@@ -456,6 +473,7 @@ export const config = configSchema.parse({
 ### Horizontal Scaling (Future v3.0)
 
 **Stateless Services:**
+
 ```
 ┌──────────────┐      ┌──────────────┐
 │  Frontend    │      │  Frontend    │
@@ -487,6 +505,7 @@ export const config = configSchema.parse({
 ```
 
 **Required changes:**
+
 - Redis for session storage (not in-memory)
 - Redis adapter for Socket.io (multi-instance)
 - Shared PostgreSQL with connection pooling
@@ -495,11 +514,13 @@ export const config = configSchema.parse({
 ### Database Scaling
 
 **Current:**
+
 - Single PostgreSQL instance
 - Indexed queries (userId, status, createdAt)
 - Connection pooling (Prisma default)
 
 **Future:**
+
 - Read replicas (for analytics)
 - TimescaleDB extension (time-series data)
 - Partitioning (by createdAt)

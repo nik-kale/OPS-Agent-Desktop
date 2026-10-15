@@ -23,15 +23,18 @@ export class WebSocketServer {
   private userSockets: Map<string, Set<string>> = new Map(); // userId -> Set of socket IDs
 
   constructor(httpServer: HTTPServer) {
-    this.io = new Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>(httpServer, {
-      cors: {
-        origin: config.allowedOrigins,
-        credentials: true,
-      },
-      transports: ['websocket', 'polling'],
-      pingTimeout: 60000,
-      pingInterval: 25000,
-    });
+    this.io = new Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>(
+      httpServer,
+      {
+        cors: {
+          origin: config.allowedOrigins,
+          credentials: true,
+        },
+        transports: ['websocket', 'polling'],
+        pingTimeout: 60000,
+        pingInterval: 25000,
+      }
+    );
 
     this.setupMiddleware();
     this.setupEventHandlers();

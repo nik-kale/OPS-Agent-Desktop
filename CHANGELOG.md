@@ -14,6 +14,7 @@ This release focuses on production-grade enhancements: security hardening, compr
 ### Added
 
 #### Security Enhancements
+
 - **Applied Security Middleware Stack** (PR #3)
   - Helmet security headers (CSP, HSTS, X-Frame-Options) now enforced
   - CORS with origin whitelist validation (replaces permissive wildcard)
@@ -24,7 +25,7 @@ This release focuses on production-grade enhancements: security hardening, compr
   - Request size validation (10MB max)
   - Parameter pollution prevention
   - 404 and error handler middleware
-  
+
 - **Structured Logging Consistency** (PR #7)
   - Replaced all `console.log`/`console.error` with Winston logger
   - JSON-structured logs with correlation IDs
@@ -33,6 +34,7 @@ This release focuses on production-grade enhancements: security hardening, compr
   - Production-safe error logging (no sensitive data leaks)
 
 #### Testing Infrastructure
+
 - **Comprehensive Unit Test Foundation** (PR #5)
   - 80+ tests covering auth, middleware, and API routes
   - Vitest configuration with coverage reporting
@@ -44,6 +46,7 @@ This release focuses on production-grade enhancements: security hardening, compr
   - Test documentation in `backend/src/__tests__/README.md`
 
 #### Performance Optimizations
+
 - **React Performance Optimizations** (PR #10)
   - Wrapped components with `React.memo()` (CommandConsole, LiveView)
   - Memoized functions with `useCallback` (getStepIcon, formatTimestamp, handleSubmit)
@@ -64,6 +67,7 @@ This release focuses on production-grade enhancements: security hardening, compr
   - Redis-backed persistence (survives restarts)
 
 #### Documentation
+
 - **OpenAPI/Swagger Documentation** (PR #11)
   - Complete OpenAPI 3.0 specification
   - JSDoc annotations on all API endpoints
@@ -71,23 +75,26 @@ This release focuses on production-grade enhancements: security hardening, compr
   - Authentication scheme documentation
   - Request/response examples
   - OpenAPI JSON export for SDK generation
-  - *(Note: Swagger UI integration available but not deployed)*
+  - _(Note: Swagger UI integration available but not deployed)_
 
 ### Changed
 
 #### API Behavior
+
 - Mission creation now queues jobs instead of blocking execution
 - Improved error responses with consistent structure
 - Rate limiting applied to all endpoints
 - Enhanced logging for all operations
 
 #### Performance Improvements
+
 - **300% mission throughput** (1 → 3 concurrent executions)
 - **90% reduction in component re-renders**
 - **Queue-based execution** prevents blocking
 - **Retry logic** improves reliability
 
 ### Fixed
+
 - Security middleware defined but not applied (now enforced)
 - Console logging inconsistency (now structured)
 - Sequential mission blocking (now concurrent)
@@ -95,6 +102,7 @@ This release focuses on production-grade enhancements: security hardening, compr
 - Missing test coverage for critical paths
 
 ### Security
+
 - All security middleware now actively enforcing policies
 - CORS restricted to configured origins only
 - Rate limiting prevents API abuse
@@ -104,16 +112,17 @@ This release focuses on production-grade enhancements: security hardening, compr
 
 ### Performance Metrics
 
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Concurrent missions | 1 (sequential) | 3 (parallel) | **300%** |
-| Component re-renders | Every 2s (polling) | On data change only | **90% reduction** |
-| Test coverage | 0% | 60%+ (critical paths) | ✅ |
-| Logging consistency | Mixed console | Structured JSON | ✅ |
-| Security enforcement | Defined only | Fully applied | ✅ |
-| API documentation | None | Complete OpenAPI | ✅ |
+| Metric               | Before             | After                 | Improvement       |
+| -------------------- | ------------------ | --------------------- | ----------------- |
+| Concurrent missions  | 1 (sequential)     | 3 (parallel)          | **300%**          |
+| Component re-renders | Every 2s (polling) | On data change only   | **90% reduction** |
+| Test coverage        | 0%                 | 60%+ (critical paths) | ✅                |
+| Logging consistency  | Mixed console      | Structured JSON       | ✅                |
+| Security enforcement | Defined only       | Fully applied         | ✅                |
+| API documentation    | None               | Complete OpenAPI      | ✅                |
 
 ### Testing
+
 - **80+ comprehensive tests** added
 - All security-critical code paths covered
 - Authentication flows validated
@@ -121,6 +130,7 @@ This release focuses on production-grade enhancements: security hardening, compr
 - CI/CD pipeline tests will now pass
 
 ### Dependencies Added
+
 - No new dependencies (all were already in package.json)
 - Activated existing: `bullmq`, `ioredis`, `swagger-jsdoc`, `swagger-ui-express`
 
@@ -129,17 +139,19 @@ This release focuses on production-grade enhancements: security hardening, compr
 **No breaking changes** - All updates are backward compatible enhancements.
 
 Optional updates:
+
 1. **Redis**: Configure Redis for mission queue (falls back to in-memory if unavailable)
 2. **Environment**: Update `REDIS_HOST` and `REDIS_PORT` if using external Redis
 
 ### Pull Requests
+
 - #3 - Security: Apply Security Middleware Stack
-- #4 - Security: Add Authentication to API Routes *(reverted - kept for reference)*
+- #4 - Security: Add Authentication to API Routes _(reverted - kept for reference)_
 - #5 - Testing: Implement Unit Test Foundation
-- #6 - Performance: Replace Polling with WebSocket Events *(reverted - kept for reference)*
+- #6 - Performance: Replace Polling with WebSocket Events _(reverted - kept for reference)_
 - #7 - Observability: Add Structured Logging Consistency
-- #8 - Security: Protect Screenshot Endpoint *(reverted - kept for reference)*
-- #9 - Reliability: Add Error Boundary & Recovery *(reverted - kept for reference)*
+- #8 - Security: Protect Screenshot Endpoint _(reverted - kept for reference)_
+- #9 - Reliability: Add Error Boundary & Recovery _(reverted - kept for reference)_
 - #10 - Performance: Add React Performance Optimizations
 - #11 - Documentation: Create OpenAPI/Swagger Documentation
 - #12 - Architecture: Implement Concurrent Mission Queue
@@ -157,6 +169,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 ### Added
 
 #### Core Infrastructure
+
 - **Database Persistence** - PostgreSQL with Prisma ORM for mission data, users, approvals, and audit logs
 - **Authentication System** - JWT-based authentication with refresh token support
 - **Authorization (RBAC)** - Role-based access control (ADMIN, OPERATOR, VIEWER)
@@ -166,6 +179,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - **Configuration Management** - Environment-based configuration with Zod validation
 
 #### Security Features
+
 - **Input Validation** - Zod schemas for all API endpoints
 - **Rate Limiting** - Configurable limits for API endpoints (100 req/min general, 10 missions/hour)
 - **Security Headers** - Helmet middleware for security headers (CSP, HSTS, etc.)
@@ -175,6 +189,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - **Audit Logging** - Comprehensive audit trail for compliance
 
 #### Developer Experience
+
 - **Testing Infrastructure** - Vitest for backend and frontend with coverage reporting
 - **Code Quality** - ESLint + Prettier with pre-commit hooks via Husky
 - **CI/CD Pipeline** - GitHub Actions for automated testing, building, and security scanning
@@ -182,6 +197,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - **Hot Reload** - Fast development with tsx (backend) and Vite (frontend)
 
 #### API Enhancements
+
 - **Authentication Endpoints** - `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`
 - **Mission Endpoints** - Enhanced with pagination, filtering, and ownership checks
 - **Approval Workflow** - `/api/approvals/*` for action approval management
@@ -190,6 +206,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - **Dashboard Configs** - Configure dashboard adapters
 
 #### Data Models
+
 - **User** - Authentication, authorization, and profile data
 - **Mission** - Enhanced with userId, priority, execution metrics
 - **MissionStep** - Sequence numbers, duration tracking
@@ -200,6 +217,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - **RefreshToken** - Token management and rotation
 
 #### Documentation
+
 - **UPGRADE_GUIDE.md** - Comprehensive migration guide from v0.1.0 to v2.0.0
 - **ARCHITECTURE.md** - Detailed architecture documentation
 - **CHANGELOG.md** - This file
@@ -209,6 +227,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 ### Changed
 
 #### Breaking Changes
+
 - **Environment Configuration Required** - Must create `.env` file (see `.env.example`)
 - **Database Required** - PostgreSQL instance must be running
 - **Authentication Required** - Most API endpoints now require JWT token
@@ -217,30 +236,36 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - **WebSocket Preferred** - HTTP polling still supported but WebSocket recommended
 
 #### API Changes
+
 - `POST /api/missions` now requires authentication and returns enhanced mission object
 - `GET /api/missions/:id/stream` deprecated in favor of WebSocket subscriptions
 - All endpoints now return consistent error format: `{ error: "message" }`
 - Rate limiting headers added to all responses
 
 #### Infrastructure Changes
+
 - Ports: Frontend now on 8080 (production), Backend on 3001 (no change)
 - Screenshots can be stored in MinIO/S3 instead of local filesystem
 - Redis optional but recommended for caching and queues
 
 ### Deprecated
+
 - HTTP polling via `/api/missions/:id/stream` - Use WebSocket instead
 - In-memory mission storage - All data now persisted to PostgreSQL
 
 ### Removed
+
 - None (full backward compatibility where possible)
 
 ### Fixed
+
 - Security vulnerabilities from permissive CORS and no authentication
 - Data loss on server restart (now persisted to database)
 - Race conditions in mission state updates (proper transaction handling)
 - Memory leaks from screenshot accumulation (TTL-based cleanup planned)
 
 ### Security
+
 - **CVE-2024-XXXX** - Fixed SQL injection vulnerability by using Prisma parameterized queries
 - **CVE-2024-YYYY** - Fixed XSS vulnerability with input sanitization
 - Implemented secure JWT token generation with strong secrets
@@ -249,6 +274,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - Audit logging for compliance (SOC2, HIPAA ready)
 
 ### Performance
+
 - WebSocket reduces latency by ~95% vs polling (2s → <100ms)
 - Database indexing on frequently queried fields (status, userId, createdAt)
 - Connection pooling for PostgreSQL (Prisma default)
@@ -257,7 +283,9 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 ### Dependencies
 
 #### Added
+
 **Backend:**
+
 - `@prisma/client` ^5.8.0 - ORM for PostgreSQL
 - `zod` ^3.22.4 - Schema validation
 - `dotenv` ^16.3.1 - Environment variables
@@ -273,6 +301,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - `vitest` ^1.1.0 - Testing framework
 
 **Frontend:**
+
 - `socket.io-client` ^4.6.1 - WebSocket client
 - `zod` ^3.22.4 - Schema validation
 - `dompurify` ^3.0.8 - XSS protection
@@ -280,12 +309,14 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - `@testing-library/react` ^14.1.2 - Component testing
 
 **Dev Dependencies:**
+
 - `eslint` ^8.56.0 - Linting
 - `prettier` ^3.1.1 - Formatting
 - `husky` ^8.0.3 - Git hooks
 - `lint-staged` ^15.2.0 - Pre-commit linting
 
 #### Updated
+
 - `typescript` 5.3.3 (no change, confirmed compatible)
 - Build tools and type definitions updated to latest stable versions
 
@@ -320,6 +351,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 ## Upcoming in v2.1.0 (Planned)
 
 ### Will Add
+
 - Sample unit tests for critical paths
 - E2E test suite with Playwright Test
 - OpenAPI/Swagger documentation
@@ -329,6 +361,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 - Mission history and search
 
 ### Will Fix
+
 - Improve error messages
 - Add request timeout handling
 - Optimize bundle sizes
@@ -338,6 +371,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 ## Upcoming in v3.0.0 (Planned - Q2 2025)
 
 ### Will Add
+
 - LLM-powered mission planning (Claude/GPT-4)
 - Dashboard adapter framework (Grafana, Kibana, Datadog)
 - Multi-mission parallelization
@@ -350,6 +384,7 @@ This release transforms OPS-Agent-Desktop from an MVP demonstration to a product
 ---
 
 **Legend:**
+
 - 🎉 Major version (breaking changes)
 - ✨ Minor version (new features, backward compatible)
 - 🐛 Patch version (bug fixes)

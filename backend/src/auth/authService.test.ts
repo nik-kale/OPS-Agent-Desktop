@@ -266,17 +266,17 @@ describe('AuthService', () => {
 
       (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
-      await expect(
-        authService.login('user@example.com', 'WrongPassword')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('user@example.com', 'WrongPassword')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should reject non-existent user', async () => {
       (prisma.user.findUnique as any).mockResolvedValue(null);
 
-      await expect(
-        authService.login('nonexistent@example.com', 'password')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('nonexistent@example.com', 'password')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should reject inactive user', async () => {
@@ -289,9 +289,9 @@ describe('AuthService', () => {
 
       (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
-      await expect(
-        authService.login('inactive@example.com', 'password')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('inactive@example.com', 'password')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should reject OAuth user attempting password login', async () => {
@@ -305,9 +305,9 @@ describe('AuthService', () => {
 
       (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
-      await expect(
-        authService.login('oauth@example.com', 'password')
-      ).rejects.toThrow('Please login with your OAuth provider');
+      await expect(authService.login('oauth@example.com', 'password')).rejects.toThrow(
+        'Please login with your OAuth provider'
+      );
     });
   });
 
@@ -395,10 +395,9 @@ describe('AuthService', () => {
     it('should reject if user not found', async () => {
       (prisma.user.findUnique as any).mockResolvedValue(null);
 
-      await expect(
-        authService.changePassword('nonexistent', 'old', 'new')
-      ).rejects.toThrow('User not found');
+      await expect(authService.changePassword('nonexistent', 'old', 'new')).rejects.toThrow(
+        'User not found'
+      );
     });
   });
 });
-

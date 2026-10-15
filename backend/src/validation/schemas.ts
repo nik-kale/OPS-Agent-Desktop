@@ -12,9 +12,7 @@ export const createMissionSchema = z.object({
     .max(5000, 'Prompt must not exceed 5000 characters')
     .trim(),
   dashboardUrl: z.string().url().optional(),
-  dashboardType: z
-    .enum(['grafana', 'kibana', 'datadog', 'pagerduty', 'custom'])
-    .optional(),
+  dashboardType: z.enum(['grafana', 'kibana', 'datadog', 'pagerduty', 'custom']).optional(),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'CRITICAL']).default('NORMAL'),
 });
 
@@ -100,9 +98,7 @@ export const createMissionTemplateSchema = z.object({
   description: z.string().min(10).max(1000),
   category: z.string().min(1).max(50),
   promptTemplate: z.string().min(10).max(5000),
-  dashboardType: z
-    .enum(['grafana', 'kibana', 'datadog', 'pagerduty', 'custom'])
-    .optional(),
+  dashboardType: z.enum(['grafana', 'kibana', 'datadog', 'pagerduty', 'custom']).optional(),
   tags: z.array(z.string()).default([]),
 });
 

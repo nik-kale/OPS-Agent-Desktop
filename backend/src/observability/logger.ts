@@ -116,21 +116,15 @@ function generateCorrelationId(): string {
 
 // Helper functions for common log patterns
 export const loggers = {
-  mission: (missionId: string) =>
-    logger.child({ context: 'mission', missionId }),
+  mission: (missionId: string) => logger.child({ context: 'mission', missionId }),
 
-  auth: () =>
-    logger.child({ context: 'authentication' }),
+  auth: () => logger.child({ context: 'authentication' }),
 
-  browser: (missionId?: string) =>
-    logger.child({ context: 'browser-agent', missionId }),
+  browser: (missionId?: string) => logger.child({ context: 'browser-agent', missionId }),
 
-  api: (endpoint: string) =>
-    logger.child({ context: 'api', endpoint }),
+  api: (endpoint: string) => logger.child({ context: 'api', endpoint }),
 
-  db: () =>
-    logger.child({ context: 'database' }),
+  db: () => logger.child({ context: 'database' }),
 
-  queue: () =>
-    logger.child({ context: 'queue' }),
+  queue: () => logger.child({ context: 'queue' }),
 };
