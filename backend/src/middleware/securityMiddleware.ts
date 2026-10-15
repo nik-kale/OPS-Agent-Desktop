@@ -173,7 +173,7 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
     return str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
   };
 
-  const sanitizeObject = (obj: any): any => {
+  const sanitizeObject = (obj: unknown): unknown => {
     if (typeof obj === 'string') {
       return sanitizeString(obj);
     }
@@ -181,11 +181,11 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
       return obj.map(sanitizeObject);
     }
     if (obj && typeof obj === 'object') {
-      const sanitized: any = {};
-      for (const key in obj) {
-        sanitized[key] = sanitizeObject(obj[key]);
-      }
-      return sanitized;
+      // fromEntries defines own properties, so a "__proto__" key in the JSON
+      // stays data instead of replacing the prototype of the sanitized body.
+      return Object.fromEntries(
+        Object.entries(obj).map(([key, value]) => [key, sanitizeObject(value)])
+      );
     }
     return obj;
   };
@@ -204,7 +204,8 @@ export const errorHandler = (
   error: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  // Express only treats four-argument middleware as an error handler.
+  _next: NextFunction
 ) => {
   logger.error('Request error', {
     error: error.message,
