@@ -1,28 +1,23 @@
 # Multi-stage build for OPS-Agent-Desktop Frontend
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 COPY frontend/package.json ./frontend/
 
 # Install dependencies
 RUN npm ci --workspace=frontend
 
-# Build the application
-FROM base AS builder
+# Build the application (npm workspaces hoist dependencies into /app/node_modules)
+FROM deps AS builder
 WORKDIR /app
-
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/frontend/node_modules ./frontend/node_modules
 
 # Copy source code
 COPY frontend ./frontend
-COPY package.json ./
 
 # Build application
 WORKDIR /app/frontend

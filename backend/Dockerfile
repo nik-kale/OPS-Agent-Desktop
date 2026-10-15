@@ -1,39 +1,30 @@
 # Multi-stage build for OPS-Agent-Desktop Backend
-FROM node:18-alpine AS base
+# Debian rather than Alpine: Playwright's Chromium and its system
+# dependencies are only supported on glibc distributions.
+FROM node:22-bookworm-slim AS base
 
-# Install dependencies only when needed
+# Prisma's query and schema engines need OpenSSL, which the slim image omits
+RUN apt-get update -y \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies. npm workspaces hoist everything into /app/node_modules.
 FROM base AS deps
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
 
-# Install dependencies
 RUN npm ci --workspace=backend
 
-# Install Playwright browsers
-RUN npx playwright install-deps chromium
-RUN npx playwright install chromium
-
 # Build the application
-FROM base AS builder
+FROM deps AS builder
 WORKDIR /app
 
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/backend/node_modules ./backend/node_modules
-
-# Copy source code
 COPY backend ./backend
-COPY package.json ./
 
-# Generate Prisma Client
 WORKDIR /app/backend
-RUN npx prisma generate
-
-# Build application
-RUN npm run build
+RUN npx prisma generate && npm run build
 
 # Production image
 FROM base AS runner
@@ -43,23 +34,26 @@ ENV NODE_ENV=production
 ENV PORT=3001
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 opsagent
+RUN groupadd --system --gid 1001 nodejs \
+  && useradd --system --uid 1001 --gid nodejs --create-home opsagent
 
-# Copy necessary files
+# Copy necessary files (node_modules includes the generated Prisma client
+# and the Prisma CLI used by `prisma migrate deploy` in docker-compose)
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/node_modules ./node_modules
 COPY --from=builder /app/backend/package.json ./package.json
 COPY --from=builder /app/backend/prisma ./prisma
 
-# Copy Playwright browsers
-COPY --from=deps /root/.cache/ms-playwright /home/opsagent/.cache/ms-playwright
+# Install Chromium and its system libraries where the opsagent user looks for them
+RUN PLAYWRIGHT_BROWSERS_PATH=/home/opsagent/.cache/ms-playwright \
+    npx playwright install --with-deps chromium \
+  && rm -rf /var/lib/apt/lists/*
 
-# Create screenshots directory
-RUN mkdir -p /app/screenshots && chown -R opsagent:nodejs /app/screenshots
+# Create screenshots and logs directories
+RUN mkdir -p /app/screenshots /app/logs
 
-# Set ownership
-RUN chown -R opsagent:nodejs /app
+# Set ownership of the paths the app writes to
+RUN chown -R opsagent:nodejs /app/screenshots /app/logs /home/opsagent
 
 # Switch to non-root user
 USER opsagent
