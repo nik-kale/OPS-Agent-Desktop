@@ -3,6 +3,7 @@
  * Loads and validates environment variables
  */
 import * as dotenv from 'dotenv';
+import type { SignOptions } from 'jsonwebtoken';
 import { z } from 'zod';
 import * as path from 'path';
 
@@ -10,6 +11,13 @@ import * as path from 'path';
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 // Configuration schema
+// jsonwebtoken types `expiresIn` as a number or an `ms` duration string ("24h", "7d").
+const tokenLifetime = (fallback: string) =>
+  z
+    .string()
+    .default(fallback)
+    .transform((value) => value as NonNullable<SignOptions['expiresIn']>);
+
 const configSchema = z.object({
   // Server
   nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
@@ -21,9 +29,9 @@ const configSchema = z.object({
 
   // Authentication
   jwtSecret: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
-  jwtExpiration: z.string().default('24h'),
+  jwtExpiration: tokenLifetime('24h'),
   refreshTokenSecret: z.string().min(32, 'REFRESH_TOKEN_SECRET must be at least 32 characters'),
-  refreshTokenExpiration: z.string().default('7d'),
+  refreshTokenExpiration: tokenLifetime('7d'),
 
   // CORS
   allowedOrigins: z.string().transform((val) => val.split(',')),

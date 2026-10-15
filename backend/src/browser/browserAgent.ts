@@ -2,7 +2,7 @@ import { chromium, Browser, Page } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
 import { missionService } from '../missions/missionService';
-import { MissionStepType } from '../types/mission';
+import { MissionStatus, MissionStepType } from '../types/mission';
 
 /**
  * BrowserAgent orchestrates browser automation for ops missions.
@@ -70,7 +70,7 @@ export class BrowserAgent {
     const page = await this.browser.newPage();
 
     try {
-      missionService.updateStatus(missionId, 'RUNNING');
+      missionService.updateStatus(missionId, MissionStatus.RUNNING);
 
       // Step 1: Navigate to ops dashboard
       await this.navigateToDashboard(page, missionId);
@@ -90,7 +90,7 @@ export class BrowserAgent {
       // Step 6: Simulate executing approved action
       await this.executeApprovedAction(page, missionId);
 
-      missionService.updateStatus(missionId, 'COMPLETED');
+      missionService.updateStatus(missionId, MissionStatus.COMPLETED);
 
       missionService.addStep(
         missionId,
@@ -98,7 +98,7 @@ export class BrowserAgent {
         '✅ Mission completed successfully'
       );
     } catch (error) {
-      missionService.updateStatus(missionId, 'FAILED');
+      missionService.updateStatus(missionId, MissionStatus.FAILED);
       missionService.addStep(
         missionId,
         MissionStepType.OBSERVATION,

@@ -2,12 +2,12 @@
  * Prisma database client
  * Singleton instance for database access
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient as BasePrismaClient } from '@prisma/client';
 import { logger } from '../observability/logger';
 
 // Extend PrismaClient with logging
 const prismaClientSingleton = () => {
-  return new PrismaClient({
+  return new BasePrismaClient({
     log: [
       { level: 'query', emit: 'event' },
       { level: 'error', emit: 'event' },

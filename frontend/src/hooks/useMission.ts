@@ -136,7 +136,7 @@ export function useMission(missionId: string | null) {
         return {
           ...prev,
           steps: [...prev.steps, step],
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         };
       });
 
@@ -153,7 +153,7 @@ export function useMission(missionId: string | null) {
         return {
           ...prev,
           status,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         };
       });
     });
