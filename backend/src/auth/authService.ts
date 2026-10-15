@@ -143,7 +143,7 @@ export class AuthService {
   verifyAccessToken(token: string): TokenPayload {
     try {
       return jwt.verify(token, config.jwtSecret) as TokenPayload;
-    } catch (error) {
+    } catch {
       throw new Error('Invalid or expired access token');
     }
   }

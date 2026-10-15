@@ -333,7 +333,7 @@ describe('AuthService', () => {
         (prisma.refreshToken.create as any).mockResolvedValue({});
         const before = Date.now();
 
-        const { refreshToken } = await authService.loginOAuth(oauthUser as any);
+        const { refreshToken } = await authService.loginOAuth(oauthUser);
 
         const { expiresAt } = (prisma.refreshToken.create as any).mock.calls[0][0].data;
         const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
@@ -348,8 +348,8 @@ describe('AuthService', () => {
     it('issues distinct refresh tokens for logins within the same second', async () => {
       (prisma.refreshToken.create as any).mockResolvedValue({});
 
-      const first = await authService.loginOAuth(oauthUser as any);
-      const second = await authService.loginOAuth(oauthUser as any);
+      const first = await authService.loginOAuth(oauthUser);
+      const second = await authService.loginOAuth(oauthUser);
 
       expect(first.refreshToken).not.toBe(second.refreshToken);
     });

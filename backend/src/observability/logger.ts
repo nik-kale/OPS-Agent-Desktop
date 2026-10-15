@@ -2,6 +2,7 @@
  * Structured logging with Winston
  * Provides JSON-formatted logs with correlation IDs for tracing
  */
+import type { NextFunction, Request, Response } from 'express';
 import winston from 'winston';
 import { config } from '../config';
 
@@ -11,7 +12,7 @@ const devFormat = winston.format.combine(
   winston.format.timestamp({ format: 'HH:mm:ss' }),
   winston.format.printf(({ timestamp, level, message, ...meta }) => {
     const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
-    return `${timestamp} [${level}]: ${message} ${metaStr}`;
+    return `${String(timestamp)} [${level}]: ${String(message)} ${metaStr}`;
   })
 );
 
@@ -61,19 +62,17 @@ export const createCorrelationLogger = (correlationId: string) => {
 };
 
 // Express middleware for request logging with correlation ID
-export const requestLogger = (
-  req: any,
-  res: any,
-  next: any
-) => {
-  const correlationId = req.headers['x-correlation-id'] || generateCorrelationId();
+export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
+  const header = req.headers['x-correlation-id'];
+  const correlationId = (Array.isArray(header) ? header[0] : header) || generateCorrelationId();
+  const requestLog = createCorrelationLogger(correlationId);
   req.correlationId = correlationId;
-  req.logger = createCorrelationLogger(correlationId);
+  req.logger = requestLog;
 
   const start = Date.now();
 
   // Log request
-  req.logger.info('Incoming request', {
+  requestLog.info('Incoming request', {
     method: req.method,
     path: req.path,
     query: req.query,
@@ -92,11 +91,11 @@ export const requestLogger = (
     };
 
     if (res.statusCode >= 500) {
-      req.logger.error('Request failed', logData);
+      requestLog.error('Request failed', logData);
     } else if (res.statusCode >= 400) {
-      req.logger.warn('Request error', logData);
+      requestLog.warn('Request error', logData);
     } else {
-      req.logger.info('Request completed', logData);
+      requestLog.info('Request completed', logData);
     }
   });
 

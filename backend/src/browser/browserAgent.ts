@@ -179,7 +179,7 @@ export class BrowserAgent {
    * Call AutoRCA-Core for root cause analysis.
    * TODO: Replace with actual HTTP call to AutoRCA-Core service.
    */
-  private async performRCA(missionId: string, prompt: string): Promise<void> {
+  private async performRCA(missionId: string, _prompt: string): Promise<void> {
     missionService.addStep(
       missionId,
       MissionStepType.RCA,

@@ -6,9 +6,11 @@ import { Request, Response, NextFunction } from 'express';
 import { authService } from '../auth/authService';
 import { logger } from '../observability/logger';
 import { Role } from '@prisma/client';
+import type { Logger } from 'winston';
 
 // Extend Express Request to include user
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace -- Express request augmentation
   namespace Express {
     interface Request {
       user?: {
@@ -17,7 +19,7 @@ declare global {
         role: Role;
       };
       correlationId?: string;
-      logger?: any;
+      logger?: Logger;
     }
   }
 }
@@ -86,7 +88,7 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction) =>
       const payload = authService.verifyAccessToken(token);
       req.user = payload;
     }
-  } catch (error) {
+  } catch {
     // Ignore invalid tokens in optional auth
   }
 

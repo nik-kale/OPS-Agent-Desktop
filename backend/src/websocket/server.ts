@@ -3,17 +3,27 @@
  * Replaces HTTP polling with efficient bi-directional messaging
  */
 import { Server as HTTPServer } from 'http';
-import { Server as SocketIOServer, Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import type { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import { authService } from '../auth/authService';
 import { logger } from '../observability/logger';
 import { config } from '../config';
+
+interface SocketData {
+  userId: string;
+  email: string;
+  role: string;
+}
+
+type SocketIOServer = Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>;
+type AuthenticatedSocket = Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>;
 
 export class WebSocketServer {
   private io: SocketIOServer;
   private userSockets: Map<string, Set<string>> = new Map(); // userId -> Set of socket IDs
 
   constructor(httpServer: HTTPServer) {
-    this.io = new SocketIOServer(httpServer, {
+    this.io = new Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, SocketData>(httpServer, {
       cors: {
         origin: config.allowedOrigins,
         credentials: true,
@@ -36,9 +46,9 @@ export class WebSocketServer {
     this.io.use((socket, next) => {
       try {
         // Get token from handshake auth
-        const token = socket.handshake.auth.token;
+        const token: unknown = (socket.handshake.auth as Record<string, unknown>).token;
 
-        if (!token) {
+        if (typeof token !== 'string' || !token) {
           return next(new Error('Authentication required'));
         }
 
@@ -67,7 +77,7 @@ export class WebSocketServer {
    * Setup event handlers
    */
   private setupEventHandlers() {
-    this.io.on('connection', (socket: Socket) => {
+    this.io.on('connection', (socket: AuthenticatedSocket) => {
       const userId = socket.data.userId;
 
       logger.info('WebSocket client connected', {
@@ -82,7 +92,7 @@ export class WebSocketServer {
       this.userSockets.get(userId)!.add(socket.id);
 
       // Join user's personal room
-      socket.join(`user:${userId}`);
+      void socket.join(`user:${userId}`);
 
       // Handle disconnect
       socket.on('disconnect', () => {
@@ -102,20 +112,29 @@ export class WebSocketServer {
       });
 
       // Handle mission subscription
-      socket.on('mission:subscribe', (missionId: string) => {
-        socket.join(`mission:${missionId}`);
+      socket.on('mission:subscribe', (missionId: unknown) => {
+        if (typeof missionId !== 'string') {
+          return;
+        }
+        void socket.join(`mission:${missionId}`);
         logger.debug('Subscribed to mission', { userId, missionId, socketId: socket.id });
       });
 
       // Handle mission unsubscribe
-      socket.on('mission:unsubscribe', (missionId: string) => {
-        socket.leave(`mission:${missionId}`);
+      socket.on('mission:unsubscribe', (missionId: unknown) => {
+        if (typeof missionId !== 'string') {
+          return;
+        }
+        void socket.leave(`mission:${missionId}`);
         logger.debug('Unsubscribed from mission', { userId, missionId, socketId: socket.id });
       });
 
       // Handle approval events
-      socket.on('approval:subscribe', (approvalId: string) => {
-        socket.join(`approval:${approvalId}`);
+      socket.on('approval:subscribe', (approvalId: unknown) => {
+        if (typeof approvalId !== 'string') {
+          return;
+        }
+        void socket.join(`approval:${approvalId}`);
         logger.debug('Subscribed to approval', { userId, approvalId, socketId: socket.id });
       });
 
@@ -125,7 +144,7 @@ export class WebSocketServer {
       });
 
       // Error handling
-      socket.on('error', (error) => {
+      socket.on('error', (error: Error) => {
         logger.error('WebSocket error', {
           userId,
           socketId: socket.id,
@@ -138,7 +157,7 @@ export class WebSocketServer {
   /**
    * Emit mission update to all subscribers
    */
-  emitMissionUpdate(missionId: string, data: any) {
+  emitMissionUpdate(missionId: string, data: unknown) {
     this.io.to(`mission:${missionId}`).emit('mission:update', data);
     logger.debug('Emitted mission update', { missionId });
   }
@@ -146,7 +165,7 @@ export class WebSocketServer {
   /**
    * Emit mission step to subscribers
    */
-  emitMissionStep(missionId: string, step: any) {
+  emitMissionStep(missionId: string, step: { type: string }) {
     this.io.to(`mission:${missionId}`).emit('mission:step', step);
     logger.debug('Emitted mission step', { missionId, stepType: step.type });
   }
@@ -162,7 +181,7 @@ export class WebSocketServer {
   /**
    * Emit approval request to user
    */
-  emitApprovalRequest(userId: string, approval: any) {
+  emitApprovalRequest(userId: string, approval: { id: string }) {
     this.io.to(`user:${userId}`).emit('approval:request', approval);
     logger.info('Emitted approval request', { userId, approvalId: approval.id });
   }
@@ -170,7 +189,7 @@ export class WebSocketServer {
   /**
    * Emit approval response
    */
-  emitApprovalResponse(approvalId: string, response: any) {
+  emitApprovalResponse(approvalId: string, response: { status: string }) {
     this.io.to(`approval:${approvalId}`).emit('approval:response', response);
     logger.info('Emitted approval response', { approvalId, status: response.status });
   }
@@ -178,7 +197,7 @@ export class WebSocketServer {
   /**
    * Emit notification to user
    */
-  emitNotification(userId: string, notification: any) {
+  emitNotification(userId: string, notification: unknown) {
     this.io.to(`user:${userId}`).emit('notification', notification);
     logger.debug('Emitted notification to user', { userId });
   }
@@ -224,7 +243,7 @@ export class WebSocketServer {
 
     // Close server
     return new Promise<void>((resolve) => {
-      this.io.close(() => {
+      void this.io.close(() => {
         logger.info('WebSocket server closed');
         resolve();
       });

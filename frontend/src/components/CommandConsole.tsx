@@ -6,7 +6,7 @@ import './CommandConsole.css';
 
 interface CommandConsoleProps {
   mission: Mission | null;
-  onSubmitMission: (prompt: string) => void;
+  onSubmitMission: (prompt: string) => void | Promise<void>;
   isSubmitting: boolean;
   connectionStatus?: Status;
   isUsingPolling?: boolean;
@@ -25,7 +25,7 @@ export const CommandConsole = memo(function CommandConsole({
     (e: React.FormEvent) => {
       e.preventDefault();
       if (prompt.trim() && !isSubmitting) {
-        onSubmitMission(prompt.trim());
+        void onSubmitMission(prompt.trim());
         setPrompt('');
       }
     },
@@ -71,7 +71,9 @@ export const CommandConsole = memo(function CommandConsole({
 
   // Memoize sorted/processed steps to avoid recalculation on every render
   const sortedSteps = useMemo(() => {
-    if (!mission || !mission.steps) return [];
+    if (!mission || !mission.steps) {
+      return [];
+    }
     return [...mission.steps].sort((a, b) => {
       const aTime = new Date(a.timestamp).getTime();
       const bTime = new Date(b.timestamp).getTime();

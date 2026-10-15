@@ -142,7 +142,7 @@ describe('Auth Middleware', () => {
     it('should reject request without authenticated user', () => {
       mockReq.user = undefined;
 
-      const middleware = requireRole('ADMIN' as Role);
+      const middleware = requireRole('ADMIN');
       middleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
@@ -159,7 +159,7 @@ describe('Auth Middleware', () => {
         role: 'ADMIN' as Role,
       };
 
-      const middleware = requireRole('ADMIN' as Role);
+      const middleware = requireRole('ADMIN');
       middleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(nextFn).toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('Auth Middleware', () => {
         role: 'VIEWER' as Role,
       };
 
-      const middleware = requireRole('ADMIN' as Role);
+      const middleware = requireRole('ADMIN');
       middleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
@@ -190,7 +190,7 @@ describe('Auth Middleware', () => {
         role: 'OPERATOR' as Role,
       };
 
-      const middleware = requireRole('OPERATOR' as Role, 'ADMIN' as Role);
+      const middleware = requireRole('OPERATOR', 'ADMIN');
       middleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(nextFn).toHaveBeenCalled();
@@ -204,7 +204,7 @@ describe('Auth Middleware', () => {
         role: 'VIEWER' as Role,
       };
 
-      const middleware = requireRole('OPERATOR' as Role, 'ADMIN' as Role);
+      const middleware = requireRole('OPERATOR', 'ADMIN');
       middleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(mockRes.status).toHaveBeenCalledWith(403);
@@ -301,7 +301,7 @@ describe('Auth Middleware', () => {
       expect(mockReq.user).toEqual(mockPayload);
 
       // Then requireRole
-      const roleMiddleware = requireRole('ADMIN' as Role);
+      const roleMiddleware = requireRole('ADMIN');
       roleMiddleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(nextFn).toHaveBeenCalledTimes(2);
@@ -311,7 +311,7 @@ describe('Auth Middleware', () => {
       // Skip requireAuth
       mockReq.user = undefined;
 
-      const roleMiddleware = requireRole('ADMIN' as Role);
+      const roleMiddleware = requireRole('ADMIN');
       roleMiddleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(mockRes.status).toHaveBeenCalledWith(401);
@@ -326,7 +326,7 @@ describe('Auth Middleware', () => {
       };
 
       // Role must match exactly
-      const middleware = requireRole('ADMIN' as Role);
+      const middleware = requireRole('ADMIN');
       middleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(nextFn).toHaveBeenCalled();
@@ -361,7 +361,7 @@ describe('Auth Middleware', () => {
         role: 'VIEWER' as Role,
       };
 
-      const middleware = requireRole('ADMIN' as Role);
+      const middleware = requireRole('ADMIN');
       middleware(mockReq as Request, mockRes as Response, nextFn);
 
       expect(mockRes.json).toHaveBeenCalledWith({

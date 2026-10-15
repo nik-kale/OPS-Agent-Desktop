@@ -63,7 +63,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="error-icon">⚠️</div>
             <h1>Something Went Wrong</h1>
             <p className="error-message">
-              The application encountered an unexpected error and couldn't continue.
+              The application encountered an unexpected error and couldn&apos;t continue.
             </p>
 
             {this.state.error && (
