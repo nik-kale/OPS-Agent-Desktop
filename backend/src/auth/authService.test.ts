@@ -311,6 +311,50 @@ describe('AuthService', () => {
     });
   });
 
+  describe('refresh token issuance', () => {
+    const oauthUser = {
+      id: 'user-123',
+      email: 'user@example.com',
+      passwordHash: null,
+      name: 'Test User',
+      role: 'OPERATOR' as const,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastLoginAt: null,
+      oauthProvider: 'github',
+      oauthId: 'gh-1',
+    };
+
+    it('stores the expiry configured by REFRESH_TOKEN_EXPIRATION', async () => {
+      const original = config.refreshTokenExpiration;
+      config.refreshTokenExpiration = '1h';
+      try {
+        (prisma.refreshToken.create as any).mockResolvedValue({});
+        const before = Date.now();
+
+        const { refreshToken } = await authService.loginOAuth(oauthUser as any);
+
+        const { expiresAt } = (prisma.refreshToken.create as any).mock.calls[0][0].data;
+        const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
+        expect(expiresAt.getTime()).toBe((decoded.exp as number) * 1000);
+        expect(expiresAt.getTime()).toBeLessThanOrEqual(before + 60 * 60 * 1000 + 1000);
+        expect(expiresAt.getTime()).toBeGreaterThan(before + 59 * 60 * 1000);
+      } finally {
+        config.refreshTokenExpiration = original;
+      }
+    });
+
+    it('issues distinct refresh tokens for logins within the same second', async () => {
+      (prisma.refreshToken.create as any).mockResolvedValue({});
+
+      const first = await authService.loginOAuth(oauthUser as any);
+      const second = await authService.loginOAuth(oauthUser as any);
+
+      expect(first.refreshToken).not.toBe(second.refreshToken);
+    });
+  });
+
   describe('changePassword', () => {
     it('should change password successfully', async () => {
       const oldPassword = 'OldPass123!';

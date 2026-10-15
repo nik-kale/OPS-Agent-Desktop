@@ -2,6 +2,7 @@
  * Authentication service
  * Handles user authentication, JWT tokens, and sessions
  */
+import { randomUUID } from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../db/client';
@@ -200,14 +201,16 @@ export class AuthService {
       expiresIn: config.jwtExpiration,
     });
 
-    // Generate refresh token
+    // Generate refresh token. The random jwtid keeps two tokens issued to the
+    // same user within one second distinct; the column is unique.
     const refreshToken = jwt.sign(payload, config.refreshTokenSecret, {
       expiresIn: config.refreshTokenExpiration,
+      jwtid: randomUUID(),
     });
 
-    // Store refresh token in database
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+    // Store refresh token in database with the expiry the token itself carries
+    const { exp } = jwt.decode(refreshToken) as jwt.JwtPayload;
+    const expiresAt = new Date((exp as number) * 1000);
 
     await prisma.refreshToken.create({
       data: {
