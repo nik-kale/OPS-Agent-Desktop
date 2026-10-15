@@ -28,10 +28,9 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "typescript": "^5.3.3",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
-    "turbo": "^1.11.3"
+    "lint-staged": "^17.6.0",
+    "typescript": "^5.3.3"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
