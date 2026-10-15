@@ -2,7 +2,7 @@ import { chromium, Browser, Page } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
 import { missionService } from '../missions/missionService';
-import { MissionStepType } from '../types/mission';
+import { MissionStatus, MissionStepType } from '../types/mission';
 
 /**
  * BrowserAgent orchestrates browser automation for ops missions.
@@ -70,7 +70,7 @@ export class BrowserAgent {
     const page = await this.browser.newPage();
 
     try {
-      missionService.updateStatus(missionId, 'RUNNING');
+      missionService.updateStatus(missionId, MissionStatus.RUNNING);
 
       // Step 1: Navigate to ops dashboard
       await this.navigateToDashboard(page, missionId);
@@ -90,7 +90,7 @@ export class BrowserAgent {
       // Step 6: Simulate executing approved action
       await this.executeApprovedAction(page, missionId);
 
-      missionService.updateStatus(missionId, 'COMPLETED');
+      missionService.updateStatus(missionId, MissionStatus.COMPLETED);
 
       missionService.addStep(
         missionId,
@@ -98,7 +98,7 @@ export class BrowserAgent {
         '✅ Mission completed successfully'
       );
     } catch (error) {
-      missionService.updateStatus(missionId, 'FAILED');
+      missionService.updateStatus(missionId, MissionStatus.FAILED);
       missionService.addStep(
         missionId,
         MissionStepType.OBSERVATION,
@@ -110,11 +110,7 @@ export class BrowserAgent {
   }
 
   private async navigateToDashboard(page: Page, missionId: string): Promise<void> {
-    missionService.addStep(
-      missionId,
-      MissionStepType.OBSERVATION,
-      'Opening Ops Dashboard...'
-    );
+    missionService.addStep(missionId, MissionStepType.OBSERVATION, 'Opening Ops Dashboard...');
 
     // TODO: Replace with actual dashboard URL (Grafana, Datadog, etc.)
     // For MVP, using local mock-app
@@ -152,15 +148,11 @@ export class BrowserAgent {
   }
 
   private async navigateToLogs(page: Page, missionId: string): Promise<void> {
-    missionService.addStep(
-      missionId,
-      MissionStepType.OBSERVATION,
-      'Navigating to logs page...'
-    );
+    missionService.addStep(missionId, MissionStepType.OBSERVATION, 'Navigating to logs page...');
 
     // Click on "Logs" link in mock app
     const logsLink = page.locator('text=Logs');
-    if (await logsLink.count() > 0) {
+    if ((await logsLink.count()) > 0) {
       await logsLink.click();
       await page.waitForLoadState('networkidle');
     }
@@ -179,7 +171,7 @@ export class BrowserAgent {
    * Call AutoRCA-Core for root cause analysis.
    * TODO: Replace with actual HTTP call to AutoRCA-Core service.
    */
-  private async performRCA(missionId: string, prompt: string): Promise<void> {
+  private async performRCA(missionId: string, _prompt: string): Promise<void> {
     missionService.addStep(
       missionId,
       MissionStepType.RCA,
@@ -283,7 +275,7 @@ export class BrowserAgent {
 
     // Look for "Restart Service" button
     const restartButton = page.locator('button:has-text("Restart Service")');
-    if (await restartButton.count() > 0) {
+    if ((await restartButton.count()) > 0) {
       await restartButton.click();
       await page.waitForTimeout(500);
 
@@ -307,11 +299,7 @@ export class BrowserAgent {
   /**
    * Capture and save a screenshot.
    */
-  private async captureScreenshot(
-    page: Page,
-    missionId: string,
-    label: string
-  ): Promise<string> {
+  private async captureScreenshot(page: Page, missionId: string, label: string): Promise<string> {
     const timestamp = Date.now();
     const filename = `${missionId}_${label}_${timestamp}.png`;
     const filepath = path.join(this.screenshotsDir, filename);

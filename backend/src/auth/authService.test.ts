@@ -266,17 +266,17 @@ describe('AuthService', () => {
 
       (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
-      await expect(
-        authService.login('user@example.com', 'WrongPassword')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('user@example.com', 'WrongPassword')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should reject non-existent user', async () => {
       (prisma.user.findUnique as any).mockResolvedValue(null);
 
-      await expect(
-        authService.login('nonexistent@example.com', 'password')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('nonexistent@example.com', 'password')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should reject inactive user', async () => {
@@ -289,9 +289,9 @@ describe('AuthService', () => {
 
       (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
-      await expect(
-        authService.login('inactive@example.com', 'password')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('inactive@example.com', 'password')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
 
     it('should reject OAuth user attempting password login', async () => {
@@ -305,9 +305,53 @@ describe('AuthService', () => {
 
       (prisma.user.findUnique as any).mockResolvedValue(mockUser);
 
-      await expect(
-        authService.login('oauth@example.com', 'password')
-      ).rejects.toThrow('Please login with your OAuth provider');
+      await expect(authService.login('oauth@example.com', 'password')).rejects.toThrow(
+        'Please login with your OAuth provider'
+      );
+    });
+  });
+
+  describe('refresh token issuance', () => {
+    const oauthUser = {
+      id: 'user-123',
+      email: 'user@example.com',
+      passwordHash: null,
+      name: 'Test User',
+      role: 'OPERATOR' as const,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastLoginAt: null,
+      oauthProvider: 'github',
+      oauthId: 'gh-1',
+    };
+
+    it('stores the expiry configured by REFRESH_TOKEN_EXPIRATION', async () => {
+      const original = config.refreshTokenExpiration;
+      config.refreshTokenExpiration = '1h';
+      try {
+        (prisma.refreshToken.create as any).mockResolvedValue({});
+        const before = Date.now();
+
+        const { refreshToken } = await authService.loginOAuth(oauthUser);
+
+        const { expiresAt } = (prisma.refreshToken.create as any).mock.calls[0][0].data;
+        const decoded = jwt.decode(refreshToken) as jwt.JwtPayload;
+        expect(expiresAt.getTime()).toBe((decoded.exp as number) * 1000);
+        expect(expiresAt.getTime()).toBeLessThanOrEqual(before + 60 * 60 * 1000 + 1000);
+        expect(expiresAt.getTime()).toBeGreaterThan(before + 59 * 60 * 1000);
+      } finally {
+        config.refreshTokenExpiration = original;
+      }
+    });
+
+    it('issues distinct refresh tokens for logins within the same second', async () => {
+      (prisma.refreshToken.create as any).mockResolvedValue({});
+
+      const first = await authService.loginOAuth(oauthUser);
+      const second = await authService.loginOAuth(oauthUser);
+
+      expect(first.refreshToken).not.toBe(second.refreshToken);
     });
   });
 
@@ -351,10 +395,9 @@ describe('AuthService', () => {
     it('should reject if user not found', async () => {
       (prisma.user.findUnique as any).mockResolvedValue(null);
 
-      await expect(
-        authService.changePassword('nonexistent', 'old', 'new')
-      ).rejects.toThrow('User not found');
+      await expect(authService.changePassword('nonexistent', 'old', 'new')).rejects.toThrow(
+        'User not found'
+      );
     });
   });
 });
-

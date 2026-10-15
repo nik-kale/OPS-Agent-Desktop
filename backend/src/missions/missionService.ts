@@ -1,10 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import {
-  Mission,
-  MissionStep,
-  MissionStepType,
-  MissionStatus,
-} from '../types/mission';
+import { Mission, MissionStep, MissionStepType, MissionStatus } from '../types/mission';
 
 /**
  * MissionService orchestrates autonomous ops missions.

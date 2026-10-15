@@ -6,7 +6,7 @@ import './CommandConsole.css';
 
 interface CommandConsoleProps {
   mission: Mission | null;
-  onSubmitMission: (prompt: string) => void;
+  onSubmitMission: (prompt: string) => void | Promise<void>;
   isSubmitting: boolean;
   connectionStatus?: Status;
   isUsingPolling?: boolean;
@@ -25,7 +25,7 @@ export const CommandConsole = memo(function CommandConsole({
     (e: React.FormEvent) => {
       e.preventDefault();
       if (prompt.trim() && !isSubmitting) {
-        onSubmitMission(prompt.trim());
+        void onSubmitMission(prompt.trim());
         setPrompt('');
       }
     },
@@ -71,7 +71,9 @@ export const CommandConsole = memo(function CommandConsole({
 
   // Memoize sorted/processed steps to avoid recalculation on every render
   const sortedSteps = useMemo(() => {
-    if (!mission || !mission.steps) return [];
+    if (!mission || !mission.steps) {
+      return [];
+    }
     return [...mission.steps].sort((a, b) => {
       const aTime = new Date(a.timestamp).getTime();
       const bTime = new Date(b.timestamp).getTime();
@@ -128,21 +130,15 @@ export const CommandConsole = memo(function CommandConsole({
                 <div className="step-icon">{getStepIcon(step.type)}</div>
                 <div className="step-content">
                   <div className="step-header">
-                    <span className={`step-type ${step.type.toLowerCase()}`}>
-                      {step.type}
-                    </span>
-                    <span className="step-timestamp">
-                      {formatTimestamp(step.timestamp)}
-                    </span>
+                    <span className={`step-type ${step.type.toLowerCase()}`}>{step.type}</span>
+                    <span className="step-timestamp">{formatTimestamp(step.timestamp)}</span>
                   </div>
                   <div className="step-message">{step.message}</div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="timeline-empty">
-              No active mission. Enter a prompt above to begin.
-            </div>
+            <div className="timeline-empty">No active mission. Enter a prompt above to begin.</div>
           )}
         </div>
       </div>

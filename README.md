@@ -9,6 +9,7 @@
 ## 🎉 Version 2.1 - Quality & Performance Update! 🚀
 
 **NEW in v2.1 (December 2025):**
+
 - ⭐ **Security Middleware Enforced** - CORS, Helmet, rate limiting now actively protecting all endpoints
 - ⭐ **Concurrent Mission Queue** - 3 missions execute simultaneously (300% throughput increase)
 - ⭐ **80+ Comprehensive Tests** - Full coverage of auth, middleware, and API routes
@@ -19,6 +20,7 @@
 - ✅ **Queue Management API** - Real-time queue status and job position endpoints
 
 **v2.0 Foundation:**
+
 - ✅ **PostgreSQL + Prisma** - Persistent database storage
 - ✅ **JWT Authentication** - Secure user authentication and RBAC
 - ✅ **WebSocket Support** - Real-time updates (no more polling!)
@@ -26,6 +28,16 @@
 - ✅ **CI/CD Pipeline** - Automated testing and builds via GitHub Actions
 
 **📖 [Upgrade Guide](UPGRADE_GUIDE.md)** | **🏗️ [Architecture Docs](ARCHITECTURE.md)** | **📋 [Changelog](CHANGELOG.md)**
+
+### Implementation status on `main`
+
+Several of the features above were built on branches that have not been merged, or exist as modules the server does not load yet. What the running server does today:
+
+- **Wired in** (`backend/src/index.ts`): the mission API, the security middleware (Helmet, CORS allow-list, rate limiting, input sanitization), the Playwright browser agent and an in-memory mission store. The frontend follows a mission by HTTP polling.
+- **In the codebase, not wired in**: the Prisma schema and mission repository (missions live in memory and are lost on restart), the JWT auth service and middleware (the mission routes do not require authentication), the Socket.IO server (never started, so the frontend always polls) and the OpenAPI definition in `backend/src/config/swagger.ts` (not served).
+- **Not on `main`**: the BullMQ mission queue and queue API (`feat/concurrent-mission-queue`) and route-level authentication (`security/add-api-authentication`).
+
+The test suite covers the API routes, auth service, auth and security middleware, configuration, database logging and the frontend's mission hook.
 
 ---
 
@@ -111,37 +123,47 @@ FUTURE INTEGRATIONS:
 ## Key Features
 
 ### 🎯 High-Level Mission Prompts
+
 Instead of writing scripts, operators type natural language commands:
+
 - "Diagnose 500 errors on checkout service"
 - "Find the root cause of database connection pool exhaustion"
 - "Restart the failed Nginx service on Server 4"
 
 ### 📺 Real-Time Browser Automation
+
 Watch your agent navigate dashboards, read logs, and interact with UIs — just like a human operator would. Every step is captured as a screenshot and logged.
 
 ### 🔍 Transparent Mission Timeline
+
 All agent actions are categorized and timestamped:
+
 - **OBSERVATION**: Read-only actions (viewing dashboards, reading logs)
 - **ACTION**: Write interventions (restart service, scale replicas) — require gateway approval
 - **RCA**: Root cause analysis steps (calling AutoRCA-Core)
 - **REMEDIATION**: Proposed fixes (calling Secure-MCP-Gateway for approval)
 
 ### 🛡️ Safety & Human-in-the-Loop
+
 Clear separation between safe observations and risky interventions. All ACTION steps are designed to flow through **Secure-MCP-Gateway** for policy-based approvals before execution.
 
 ### 🤖 Designed for Integration
+
 Built to plug into:
+
 - **[AutoRCA-Core](https://github.com/nik-kale/AutoRCA-Core)**: Agentic root cause analysis engine
 - **[Secure-MCP-Gateway](https://github.com/nik-kale/Secure-MCP-Gateway)**: Security-first MCP gateway for ops tools
 - **Real dashboards**: Grafana, Kibana, Datadog, etc. (replace mock-app with your actual stack)
 
 ### ⚡ Production-Grade Performance (NEW in v2.1)
+
 - **Concurrent Execution**: 3 missions run simultaneously via BullMQ job queue
 - **React Optimizations**: Memoized components prevent unnecessary re-renders
 - **Queue Management**: Track job position, progress, and estimated wait time
 - **Automatic Retries**: 3 attempts with exponential backoff on failures
 
 ### 🔒 Enterprise Security (NEW in v2.1)
+
 - **Security Middleware**: Helmet headers, CORS validation, rate limiting enforced
 - **Structured Logging**: Winston logger with correlation IDs and audit trails
 - **80+ Security Tests**: Comprehensive coverage of auth flows and attack vectors
@@ -149,6 +171,7 @@ Built to plug into:
 - **No Console Logging**: ESLint enforces structured logging only
 
 ### 📚 Developer Experience (NEW in v2.1)
+
 - **OpenAPI/Swagger**: Complete API documentation with schemas
 - **Comprehensive Tests**: 80+ tests covering critical security paths
 - **Type Safety**: Enhanced TypeScript with strict mode
@@ -160,7 +183,7 @@ Built to plug into:
 
 ### Prerequisites
 
-- **Node.js** 18+ and **npm** (or pnpm/yarn)
+- **Node.js** 22+ and **npm** (the build tooling needs Node 20.19+; CI and the Docker images use 22)
 - **Playwright** browsers (will be installed automatically)
 
 ### Installation
@@ -182,24 +205,28 @@ npx playwright install chromium
 You'll need **three terminals** to run the full stack:
 
 #### Terminal 1: Backend (Mission Orchestration + Browser Agent)
+
 ```bash
 npm run dev:backend
 # Runs on http://localhost:3001
 ```
 
 #### Terminal 2: Frontend (Mission Control UI)
+
 ```bash
 npm run dev:frontend
 # Runs on http://localhost:5173
 ```
 
 #### Terminal 3: Mock App (Simulated Ops Dashboard)
+
 ```bash
 npm run dev:mock
 # Runs on http://localhost:5174
 ```
 
 **OR** run all three concurrently:
+
 ```bash
 npm run dev
 ```
@@ -209,6 +236,7 @@ npm run dev
 1. **Open the Mission Control UI**: Navigate to [http://localhost:5173](http://localhost:5173)
 
 2. **Submit a Mission**: In the command console (left panel), enter a mission prompt like:
+
    ```
    Diagnose 500 errors on checkout service
    ```
@@ -298,6 +326,7 @@ All steps are streamed to the frontend via polling and displayed in real-time.
 ### Mission Endpoints
 
 #### Create Mission
+
 ```http
 POST /api/missions
 Content-Type: application/json
@@ -313,6 +342,7 @@ Response: 201 Created
 ```
 
 #### Get Mission Details
+
 ```http
 GET /api/missions/{id}
 
@@ -330,6 +360,7 @@ Response: 200 OK
 ```
 
 #### Stream Mission Updates (Polling)
+
 ```http
 GET /api/missions/{id}/stream
 
@@ -341,6 +372,7 @@ Response: 200 OK
 ```
 
 #### List Missions
+
 ```http
 GET /api/missions
 
@@ -353,6 +385,7 @@ Response: 200 OK
 ### Queue Management Endpoints (NEW)
 
 #### Get Queue Status
+
 ```http
 GET /api/queue/status
 
@@ -371,6 +404,7 @@ Response: 200 OK
 ```
 
 #### Get Job Details
+
 ```http
 GET /api/queue/job/{jobId}
 
@@ -388,6 +422,7 @@ Response: 200 OK
 ```
 
 ### Health Check
+
 ```http
 GET /health
 
@@ -400,14 +435,14 @@ Response: 200 OK
 
 ### Performance Metrics
 
-| Capability | Metric |
-|------------|--------|
-| **Concurrent Missions** | 3 simultaneous executions |
-| **Queue Throughput** | 300% vs sequential |
-| **Retry Logic** | 3 attempts, exponential backoff |
-| **Rate Limiting** | 100 req/15min (general), 10 missions/hour |
-| **Component Performance** | 90% fewer re-renders |
-| **Test Coverage** | 80+ tests, 60%+ coverage |
+| Capability                | Metric                                  |
+| ------------------------- | --------------------------------------- |
+| **Concurrent Missions**   | 3 simultaneous executions               |
+| **Queue Throughput**      | 300% vs sequential                      |
+| **Retry Logic**           | 3 attempts, exponential backoff         |
+| **Rate Limiting**         | 100 req/min (general), 10 missions/hour |
+| **Component Performance** | 90% fewer re-renders                    |
+| **Test Coverage**         | 80+ tests, 60%+ coverage                |
 
 ---
 
@@ -415,17 +450,19 @@ Response: 200 OK
 
 **Ops-Agent-Desktop** is one component of a larger **Autonomous Operations Fabric**:
 
-| Component | Role |
-|-----------|------|
-| **[AutoRCA-Core (ADAPT-RCA)](https://github.com/nik-kale/AutoRCA-Core)** | Graph-based root cause analysis engine for logs/metrics/traces |
-| **[Secure-MCP-Gateway](https://github.com/nik-kale/Secure-MCP-Gateway)** | Security-first MCP gateway with policy enforcement and human approvals |
-| **Ops-Agent-Desktop** *(this project)* | Visual mission control for browser-based agent investigations |
-| **[awesome-autonomous-ops](https://github.com/nik-kale/awesome-autonomous-ops)** | Curated list of tools and resources for AI-powered ops |
+| Component                                                                        | Role                                                                   |
+| -------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **[AutoRCA-Core (ADAPT-RCA)](https://github.com/nik-kale/AutoRCA-Core)**         | Graph-based root cause analysis engine for logs/metrics/traces         |
+| **[Secure-MCP-Gateway](https://github.com/nik-kale/Secure-MCP-Gateway)**         | Security-first MCP gateway with policy enforcement and human approvals |
+| **Ops-Agent-Desktop** _(this project)_                                           | Visual mission control for browser-based agent investigations          |
+| **[awesome-autonomous-ops](https://github.com/nik-kale/awesome-autonomous-ops)** | Curated list of tools and resources for AI-powered ops                 |
 
 ### Integration Points
 
 #### AutoRCA-Core
+
 Replace the stub in `backend/src/browser/browserAgent.ts:performRCA()` with:
+
 ```typescript
 const rcaResult = await fetch('http://autorka-core:8000/analyze', {
   method: 'POST',
@@ -441,7 +478,9 @@ const rcaSummary = await rcaResult.json();
 ```
 
 #### Secure-MCP-Gateway
+
 Replace the stub in `backend/src/browser/browserAgent.ts:proposeRemediation()` with:
+
 ```typescript
 const remediation = await fetch('http://secure-mcp-gateway:8080/propose', {
   method: 'POST',
@@ -457,7 +496,9 @@ const proposal = await remediation.json();
 ```
 
 #### Real Dashboards
+
 Replace `http://localhost:5174` in `browserAgent.ts` with:
+
 - **Grafana**: `https://your-grafana.example.com/d/your-dashboard`
 - **Kibana**: `https://your-kibana.example.com/app/logs`
 - **Datadog**: `https://app.datadoghq.com/dashboard/your-dashboard`
@@ -472,16 +513,17 @@ Update the navigation logic to match your actual dashboard's DOM structure.
 
 **Ops-Agent-Desktop** is designed with a clear security boundary:
 
-| Action Type | Risk Level | Gateway Required | Example |
-|-------------|-----------|------------------|---------|
-| **OBSERVATION** | Low | ❌ No | Reading dashboards, viewing logs, taking screenshots |
-| **RCA** | Low | ❌ No | Running analysis, generating summaries |
-| **REMEDIATION (Proposal)** | Medium | ❌ No | Proposing fixes (not executing) |
-| **ACTION** | High | ✅ **Yes** | Restarting services, scaling resources, modifying configs |
+| Action Type                | Risk Level | Gateway Required | Example                                                   |
+| -------------------------- | ---------- | ---------------- | --------------------------------------------------------- |
+| **OBSERVATION**            | Low        | ❌ No            | Reading dashboards, viewing logs, taking screenshots      |
+| **RCA**                    | Low        | ❌ No            | Running analysis, generating summaries                    |
+| **REMEDIATION (Proposal)** | Medium     | ❌ No            | Proposing fixes (not executing)                           |
+| **ACTION**                 | High       | ✅ **Yes**       | Restarting services, scaling resources, modifying configs |
 
 ### Human-in-the-Loop for Write Actions
 
 All **ACTION** steps should route through **Secure-MCP-Gateway** with:
+
 - Policy-based allow/deny/review decisions
 - Approval UI for human operators (Slack, PagerDuty, custom dashboard)
 - Audit logging of all decisions and executions
@@ -495,6 +537,7 @@ All **ACTION** steps should route through **Secure-MCP-Gateway** with:
 ### Audit Trail
 
 Every mission is logged with:
+
 - Full step-by-step timeline
 - Screenshots at each critical action
 - Timestamps and correlation IDs
@@ -555,6 +598,7 @@ cd frontend && npm run type-check
 Contributions are welcome! This is an open-source reference architecture for AI-powered autonomous operations.
 
 **Areas for contribution:**
+
 - Real dashboard adapters (Grafana, Kibana, Datadog, etc.)
 - Additional mission templates (database troubleshooting, network diagnostics, etc.)
 - Improved LLM-based mission planning

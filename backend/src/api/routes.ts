@@ -6,16 +6,26 @@ import { missionRateLimiter } from '../middleware/securityMiddleware';
 
 const router = Router();
 
+// Matches createMissionSchema in validation/schemas.ts.
+export const MAX_PROMPT_LENGTH = 5000;
+
 /**
  * POST /api/missions
  * Create a new mission and begin execution.
  */
-router.post('/missions', missionRateLimiter, async (req: Request, res: Response) => {
+router.post('/missions', missionRateLimiter, (req: Request, res: Response) => {
   try {
-    const { prompt } = req.body as CreateMissionRequest;
+    const { prompt: rawPrompt } = (req.body ?? {}) as Partial<CreateMissionRequest>;
+    const prompt = typeof rawPrompt === 'string' ? rawPrompt.trim() : '';
 
-    if (!prompt || typeof prompt !== 'string') {
+    if (!prompt) {
       return res.status(400).json({ error: 'Invalid prompt' });
+    }
+
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return res
+        .status(400)
+        .json({ error: `Invalid prompt: must not exceed ${MAX_PROMPT_LENGTH} characters` });
     }
 
     const mission = missionService.createMission(prompt);
@@ -59,9 +69,7 @@ router.get('/missions/:id/stream', (req: Request, res: Response) => {
 
     res.json({
       mission,
-      latestScreenshot: latestScreenshot
-        ? `/screenshots/${latestScreenshot}`
-        : undefined,
+      latestScreenshot: latestScreenshot ? `/screenshots/${latestScreenshot}` : undefined,
     });
   } catch (error) {
     console.error('Error streaming mission:', error);

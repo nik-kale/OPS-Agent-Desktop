@@ -62,11 +62,7 @@ describe('Security Middleware', () => {
 
     it('should handle arrays', () => {
       mockReq.body = {
-        tags: [
-          'tag1',
-          '<script>evil</script>tag2',
-          'tag3<script>bad</script>',
-        ],
+        tags: ['tag1', '<script>evil</script>tag2', 'tag3<script>bad</script>'],
       };
 
       sanitizeInput(mockReq as Request, mockRes as Response, nextFn);
@@ -111,6 +107,18 @@ describe('Security Middleware', () => {
       sanitizeInput(mockReq as Request, mockRes as Response, nextFn);
 
       expect(mockReq.body.text).toBe('SafeContent');
+      expect(nextFn).toHaveBeenCalled();
+    });
+
+    it('should not let a "__proto__" key inject inherited properties', () => {
+      // express.json() parses "__proto__" into an own property, as JSON.parse does
+      mockReq.body = JSON.parse('{"prompt":"hi","__proto__":{"role":"ADMIN"}}');
+
+      sanitizeInput(mockReq as Request, mockRes as Response, nextFn);
+
+      expect(Object.getPrototypeOf(mockReq.body)).toBe(Object.prototype);
+      expect(mockReq.body.role).toBeUndefined();
+      expect(mockReq.body.prompt).toBe('hi');
       expect(nextFn).toHaveBeenCalled();
     });
   });
@@ -317,4 +325,3 @@ describe('Security Middleware', () => {
     });
   });
 });
-

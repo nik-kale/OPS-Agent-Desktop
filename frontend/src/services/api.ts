@@ -22,7 +22,7 @@ export const api = {
       throw new Error(`Failed to create mission: ${response.statusText}`);
     }
 
-    return response.json();
+    return (await response.json()) as { missionId: string };
   },
 
   /**
@@ -35,7 +35,7 @@ export const api = {
       throw new Error(`Failed to get mission stream: ${response.statusText}`);
     }
 
-    return response.json();
+    return (await response.json()) as MissionStreamResponse;
   },
 
   /**
@@ -48,7 +48,7 @@ export const api = {
       throw new Error(`Failed to get mission: ${response.statusText}`);
     }
 
-    return response.json();
+    return (await response.json()) as { mission: Mission };
   },
 
   /**
@@ -61,6 +61,6 @@ export const api = {
       throw new Error(`Failed to list missions: ${response.statusText}`);
     }
 
-    return response.json();
+    return (await response.json()) as { missions: Mission[] };
   },
 };

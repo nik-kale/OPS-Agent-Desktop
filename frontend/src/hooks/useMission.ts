@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Mission, MissionStatus } from '../types/mission';
+import { Mission, MissionStatus, MissionStep } from '../types/mission';
 import { api } from '../services/api';
 
 /**
@@ -14,6 +14,24 @@ export enum ConnectionStatus {
   ERROR = 'error',
 }
 
+interface ServerToClientEvents {
+  'mission:update': (mission: Mission) => void;
+  'mission:step': (step: MissionStep) => void;
+  'mission:status': (payload: { missionId: string; status: MissionStatus }) => void;
+}
+
+interface ClientToServerEvents {
+  'mission:subscribe': (missionId: string) => void;
+  'mission:unsubscribe': (missionId: string) => void;
+}
+
+type MissionSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
+
+const POLL_INTERVAL_MS = 2000;
+
+const isFinished = (status?: MissionStatus) =>
+  status === MissionStatus.COMPLETED || status === MissionStatus.FAILED;
+
 /**
  * Custom hook for managing mission state with WebSocket real-time updates.
  * Falls back to polling if WebSocket connection fails.
@@ -26,13 +44,15 @@ export function useMission(missionId: string | null) {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
     ConnectionStatus.DISCONNECTED
   );
+  // State rather than a ref: switching to polling must re-run the polling effect.
+  const [isUsingPolling, setIsUsingPolling] = useState(false);
 
-  const socketRef = useRef<Socket | null>(null);
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const usePollingFallback = useRef(false);
+  const socketRef = useRef<MissionSocket | null>(null);
 
   const fetchMissionStream = useCallback(async () => {
-    if (!missionId) return;
+    if (!missionId) {
+      return;
+    }
 
     try {
       const response = await api.getMissionStream(missionId);
@@ -48,19 +68,24 @@ export function useMission(missionId: string | null) {
 
   // Setup WebSocket connection
   useEffect(() => {
-    if (!missionId) return;
+    if (!missionId) {
+      return;
+    }
 
     // Get auth token from localStorage
     const token = localStorage.getItem('authToken');
 
     if (!token) {
       console.warn('No auth token found, using polling fallback');
-      usePollingFallback.current = true;
+      setIsUsingPolling(true);
       return;
     }
 
+    setIsUsingPolling(false);
+    setConnectionStatus(ConnectionStatus.CONNECTING);
+
     // Initialize Socket.IO connection
-    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
+    const socket: MissionSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001', {
       auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
@@ -73,24 +98,23 @@ export function useMission(missionId: string | null) {
 
     // Connection event handlers
     socket.on('connect', () => {
-      console.log('WebSocket connected:', socket.id);
       setConnectionStatus(ConnectionStatus.CONNECTED);
-      usePollingFallback.current = false;
+      setError(null);
+      setIsUsingPolling(false);
 
-      // Subscribe to mission updates
+      // Subscribe to mission updates (also re-subscribes after a reconnect)
       socket.emit('mission:subscribe', missionId);
 
       // Fetch initial state
-      fetchMissionStream();
+      void fetchMissionStream();
     });
 
     socket.on('disconnect', (reason) => {
-      console.log('WebSocket disconnected:', reason);
       setConnectionStatus(ConnectionStatus.DISCONNECTED);
 
       // If server initiated disconnect, fall back to polling
       if (reason === 'io server disconnect' || reason === 'io client disconnect') {
-        usePollingFallback.current = true;
+        setIsUsingPolling(true);
       }
     });
 
@@ -100,43 +124,34 @@ export function useMission(missionId: string | null) {
       setError('WebSocket connection failed, falling back to polling');
 
       // Fall back to polling after connection errors
-      usePollingFallback.current = true;
+      setIsUsingPolling(true);
     });
 
-    socket.on('reconnect', (attemptNumber) => {
-      console.log('WebSocket reconnected after', attemptNumber, 'attempts');
-      setConnectionStatus(ConnectionStatus.CONNECTED);
-      setError(null);
-      usePollingFallback.current = false;
-
-      // Resubscribe to mission
-      socket.emit('mission:subscribe', missionId);
-    });
-
-    socket.on('reconnect_attempt', () => {
+    // Reconnection events are emitted by the Manager, not the socket.
+    socket.io.on('reconnect_attempt', () => {
       setConnectionStatus(ConnectionStatus.RECONNECTING);
     });
 
-    socket.on('reconnect_failed', () => {
+    socket.io.on('reconnect_failed', () => {
       console.error('WebSocket reconnection failed, using polling fallback');
       setConnectionStatus(ConnectionStatus.ERROR);
-      usePollingFallback.current = true;
+      setIsUsingPolling(true);
     });
 
     // Mission event handlers
     socket.on('mission:update', (data) => {
-      console.log('Received mission update:', data);
       setMission(data);
     });
 
     socket.on('mission:step', (step) => {
-      console.log('Received mission step:', step);
       setMission((prev) => {
-        if (!prev) return prev;
+        if (!prev) {
+          return prev;
+        }
         return {
           ...prev,
           steps: [...prev.steps, step],
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         };
       });
 
@@ -147,13 +162,14 @@ export function useMission(missionId: string | null) {
     });
 
     socket.on('mission:status', ({ status }) => {
-      console.log('Received mission status:', status);
       setMission((prev) => {
-        if (!prev) return prev;
+        if (!prev) {
+          return prev;
+        }
         return {
           ...prev,
           status,
-          updatedAt: new Date(),
+          updatedAt: new Date().toISOString(),
         };
       });
     });
@@ -168,57 +184,30 @@ export function useMission(missionId: string | null) {
     };
   }, [missionId, fetchMissionStream]);
 
-  // Polling fallback when WebSocket is unavailable
+  const missionFinished = isFinished(mission?.status);
+
+  // Polling fallback when WebSocket is unavailable; stops once the mission ends
   useEffect(() => {
-    if (!missionId) return;
-
-    // Start polling if fallback is enabled and no active interval
-    if (usePollingFallback.current && !pollingIntervalRef.current) {
-      console.log('Using polling fallback mode');
-
-      // Initial fetch
-      setIsLoading(true);
-      fetchMissionStream().finally(() => setIsLoading(false));
-
-      // Poll every 2 seconds
-      pollingIntervalRef.current = setInterval(() => {
-        fetchMissionStream();
-      }, 2000);
+    if (!missionId || !isUsingPolling || missionFinished) {
+      return;
     }
 
-    // Stop polling if WebSocket is connected
-    if (!usePollingFallback.current && pollingIntervalRef.current) {
-      console.log('WebSocket connected, stopping polling');
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
+    setIsLoading(true);
+    void fetchMissionStream().finally(() => setIsLoading(false));
 
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    };
-  }, [missionId, fetchMissionStream]);
+    const interval = setInterval(() => {
+      void fetchMissionStream();
+    }, POLL_INTERVAL_MS);
 
-  // Stop polling when mission is completed or failed
+    return () => clearInterval(interval);
+  }, [missionId, isUsingPolling, missionFinished, fetchMissionStream]);
+
+  // Unsubscribe from WebSocket updates when the mission is completed or failed
   useEffect(() => {
-    if (
-      mission?.status === MissionStatus.COMPLETED ||
-      mission?.status === MissionStatus.FAILED
-    ) {
-      // Unsubscribe from WebSocket
-      if (socketRef.current?.connected) {
-        socketRef.current.emit('mission:unsubscribe', missionId || '');
-      }
-
-      // Stop polling
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
+    if (missionFinished && missionId && socketRef.current?.connected) {
+      socketRef.current.emit('mission:unsubscribe', missionId);
     }
-  }, [mission?.status, missionId]);
+  }, [missionFinished, missionId]);
 
   return {
     mission,
@@ -227,7 +216,7 @@ export function useMission(missionId: string | null) {
     isLoading,
     connectionStatus,
     isConnected: connectionStatus === ConnectionStatus.CONNECTED,
-    isUsingPolling: usePollingFallback.current,
+    isUsingPolling,
     refetch: fetchMissionStream,
   };
 }

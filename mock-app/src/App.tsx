@@ -56,18 +56,8 @@ function DashboardPage({ serviceRestarted, onRestartService }: DashboardPageProp
       <h2>Service Health Overview</h2>
 
       <div className="metrics-grid">
-        <MetricCard
-          title="API Gateway"
-          status="healthy"
-          value="99.9%"
-          label="Uptime"
-        />
-        <MetricCard
-          title="Auth Service"
-          status="healthy"
-          value="142ms"
-          label="Avg Response Time"
-        />
+        <MetricCard title="API Gateway" status="healthy" value="99.9%" label="Uptime" />
+        <MetricCard title="Auth Service" status="healthy" value="142ms" label="Avg Response Time" />
         <MetricCard
           title="Checkout Service"
           status="critical"
@@ -91,8 +81,7 @@ function DashboardPage({ serviceRestarted, onRestartService }: DashboardPageProp
           </div>
           <div className="alert-title">High Error Rate on Checkout Service</div>
           <div className="alert-details">
-            500 Internal Server Error - 15 errors/min detected. Users unable to
-            complete purchases.
+            500 Internal Server Error - 15 errors/min detected. Users unable to complete purchases.
           </div>
         </div>
         <div className="alert warning">
@@ -102,8 +91,7 @@ function DashboardPage({ serviceRestarted, onRestartService }: DashboardPageProp
           </div>
           <div className="alert-title">Database Connection Pool Exhaustion</div>
           <div className="alert-details">
-            checkout-db-primary: 100/100 connections in use. May impact service
-            availability.
+            checkout-db-primary: 100/100 connections in use. May impact service availability.
           </div>
         </div>
       </div>
@@ -130,8 +118,7 @@ function LogsPage() {
       timestamp: '2024-01-15 14:28:43',
       level: 'ERROR',
       service: 'checkout-service',
-      message:
-        'ConnectionPoolTimeoutException: Timeout waiting for connection from pool',
+      message: 'ConnectionPoolTimeoutException: Timeout waiting for connection from pool',
     },
     {
       timestamp: '2024-01-15 14:28:42',
@@ -155,8 +142,7 @@ function LogsPage() {
       timestamp: '2024-01-15 14:28:35',
       level: 'ERROR',
       service: 'checkout-service',
-      message:
-        'Database connection pool exhausted: 100/100 connections active',
+      message: 'Database connection pool exhausted: 100/100 connections active',
     },
     {
       timestamp: '2024-01-15 14:28:30',
@@ -185,9 +171,7 @@ function LogsPage() {
         {logs.map((log, index) => (
           <div key={index} className={`log-entry ${log.level.toLowerCase()}`}>
             <span className="log-timestamp">{log.timestamp}</span>
-            <span className={`log-level ${log.level.toLowerCase()}`}>
-              {log.level}
-            </span>
+            <span className={`log-level ${log.level.toLowerCase()}`}>{log.level}</span>
             <span className="log-service">[{log.service}]</span>
             <span className="log-message">{log.message}</span>
           </div>

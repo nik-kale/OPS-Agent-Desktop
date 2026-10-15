@@ -46,6 +46,7 @@ cp .env.example .env
 ```
 
 **Required Variables:**
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_SECRET` - At least 32 characters
 - `REFRESH_TOKEN_SECRET` - At least 32 characters
@@ -56,6 +57,7 @@ cp .env.example .env
 **After:** PostgreSQL database with Prisma ORM
 
 **Migration:** Run database migrations before starting the server
+
 ```bash
 cd backend
 npm run prisma:migrate
@@ -67,19 +69,23 @@ npm run prisma:migrate
 **After:** JWT authentication on most endpoints
 
 **Migration:**
+
 - Frontend must include `Authorization: Bearer <token>` header
 - Use `/api/auth/register` and `/api/auth/login` endpoints
 
 ### 4. API Changes
 
 #### Mission Creation
+
 **Before:**
+
 ```typescript
 POST /api/missions
 { "prompt": "Diagnose errors" }
 ```
 
 **After:**
+
 ```typescript
 POST /api/missions
 Authorization: Bearer <token>
@@ -91,18 +97,22 @@ Authorization: Bearer <token>
 ```
 
 #### Mission Retrieval
+
 **Before:**
+
 ```typescript
 GET /api/missions/:id/stream
 ```
 
 **After (HTTP still supported):**
+
 ```typescript
 GET /api/missions/:id
 Authorization: Bearer <token>
 ```
 
 **Preferred (WebSocket):**
+
 ```typescript
 // Connect to WebSocket
 const socket = io('http://localhost:3001', {
@@ -120,6 +130,7 @@ socket.on('mission:update', (data) => { ... });
 **After:** Only configured origins in `ALLOWED_ORIGINS`
 
 Update your `.env`:
+
 ```env
 ALLOWED_ORIGINS=http://localhost:5173,http://localhost:8080
 ```
@@ -131,6 +142,7 @@ ALLOWED_ORIGINS=http://localhost:5173,http://localhost:8080
 ### 1. Authentication & Authorization
 
 #### User Registration
+
 ```bash
 POST /api/auth/register
 Content-Type: application/json
@@ -143,6 +155,7 @@ Content-Type: application/json
 ```
 
 #### User Login
+
 ```bash
 POST /api/auth/login
 {
@@ -159,6 +172,7 @@ Response:
 ```
 
 #### Token Refresh
+
 ```bash
 POST /api/auth/refresh
 {
@@ -169,11 +183,13 @@ POST /api/auth/refresh
 ### 2. Role-Based Access Control (RBAC)
 
 **Roles:**
+
 - `ADMIN` - Full system access
 - `OPERATOR` - Create and manage own missions
 - `VIEWER` - Read-only access
 
 **Example:**
+
 ```typescript
 // Only admins can delete missions
 DELETE /api/missions/:id
@@ -183,11 +199,12 @@ Authorization: Bearer <admin-token>
 ### 3. Real-Time WebSocket Communication
 
 **Frontend Connection:**
+
 ```typescript
 import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:3001', {
-  auth: { token: accessToken }
+  auth: { token: accessToken },
 });
 
 // Subscribe to mission updates
@@ -251,12 +268,14 @@ POST /api/missions/from-template/:templateId
 ### 6. Structured Logging
 
 **All logs now include:**
+
 - Timestamp
 - Log level (error, warn, info, debug)
 - Correlation ID (for request tracing)
 - Context (service, userId, missionId)
 
 **Example:**
+
 ```json
 {
   "timestamp": "2025-01-23T10:30:45.123Z",
@@ -271,11 +290,13 @@ POST /api/missions/from-template/:templateId
 ### 7. Rate Limiting
 
 **Limits:**
+
 - General API: 100 requests/minute
 - Authentication: 5 attempts/15 minutes
 - Mission creation: 10 missions/hour (configurable)
 
 **Response (429 Too Many Requests):**
+
 ```json
 {
   "error": "Too many requests, please try again later"
@@ -310,6 +331,7 @@ cp .env.example .env
 ```
 
 Edit `.env` with your configuration:
+
 ```env
 # Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ops_agent_desktop
@@ -391,6 +413,7 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
 ### New package.json Scripts
 
 **Root:**
+
 ```json
 {
   "test": "Run all tests",
@@ -402,6 +425,7 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
 ```
 
 **Backend:**
+
 ```json
 {
   "test": "Run Vitest tests",
@@ -416,6 +440,7 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
 ### New TypeScript Configurations
 
 **Stricter compiler options:**
+
 - `noUncheckedIndexedAccess`: true
 - `strict`: true
 - Better type safety
@@ -423,6 +448,7 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
 ### ESLint & Prettier
 
 Pre-commit hooks now enforce:
+
 - No console.log (use logger instead)
 - Consistent formatting
 - TypeScript type checking
@@ -434,6 +460,7 @@ Pre-commit hooks now enforce:
 ### Schema Overview
 
 **Main tables:**
+
 - `users` - Authentication and authorization
 - `missions` - Mission data (persistent)
 - `mission_steps` - Execution steps
@@ -542,6 +569,7 @@ npm run type-check
 ### Git Hooks
 
 Pre-commit hooks (via Husky) automatically:
+
 - Run ESLint and fix issues
 - Format code with Prettier
 - Run TypeScript type check
@@ -549,18 +577,21 @@ Pre-commit hooks (via Husky) automatically:
 ### Debugging
 
 **Backend:**
+
 ```bash
 # Enable debug logs
 LOG_LEVEL=debug npm run dev:backend
 ```
 
 **Database queries:**
+
 ```bash
 # Prisma query logging
 # Logs are automatically enabled in development
 ```
 
 **WebSocket:**
+
 ```bash
 # Monitor WebSocket events in browser console
 socket.on('connect', () => console.log('Connected'));
@@ -576,6 +607,7 @@ socket.onAny((event, ...args) => console.log(event, args));
 **Error:** `Can't reach database server`
 
 **Solution:**
+
 ```bash
 # Check DATABASE_URL in .env
 # Ensure PostgreSQL is running
@@ -590,6 +622,7 @@ docker exec -it ops-agent-postgres psql -U postgres ops_agent_desktop
 **Error:** `JWT_SECRET must be at least 32 characters`
 
 **Solution:**
+
 ```bash
 # Generate secure secret
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -603,6 +636,7 @@ JWT_SECRET=<generated-secret>
 **Error:** `EADDRINUSE: address already in use`
 
 **Solution:**
+
 ```bash
 # Find and kill process using port 3001
 lsof -ti:3001 | xargs kill -9
@@ -616,6 +650,7 @@ PORT=3002
 **Error:** `WebSocket connection failed`
 
 **Solution:**
+
 1. Ensure backend is running
 2. Check ALLOWED_ORIGINS includes frontend URL
 3. Verify token is valid and not expired
@@ -625,6 +660,7 @@ PORT=3002
 **Error:** `Cannot find module '@prisma/client'`
 
 **Solution:**
+
 ```bash
 cd backend
 npm run prisma:generate
@@ -637,18 +673,21 @@ npm run prisma:generate
 ### Recommended Actions
 
 1. **Enable Feature Flags** - Gradually enable new features in `.env`:
+
    ```env
    ENABLE_WEBSOCKET=true
    ENABLE_MULTI_MISSION=true
    ```
 
 2. **Setup Monitoring** - Configure OpenTelemetry:
+
    ```env
    ENABLE_TELEMETRY=true
    OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
    ```
 
 3. **Configure LLM** - Add API key for mission planning:
+
    ```env
    ANTHROPIC_API_KEY=sk-ant-...
    ENABLE_LLM_PLANNING=true
@@ -674,6 +713,7 @@ npm run prisma:generate
 ## Support
 
 For issues or questions:
+
 - GitHub Issues: https://github.com/nik-kale/OPS-Agent-Desktop/issues
 - Documentation: See README.md and code comments
 - Logs: Check `logs/` directory for detailed error logs

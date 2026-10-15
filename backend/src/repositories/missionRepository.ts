@@ -134,7 +134,7 @@ export class MissionRepository {
     };
 
     // Set timestamps based on status
-    if (status === 'RUNNING' && !await this.hasStarted(id)) {
+    if (status === 'RUNNING' && !(await this.hasStarted(id))) {
       updateData.startedAt = new Date();
     }
 

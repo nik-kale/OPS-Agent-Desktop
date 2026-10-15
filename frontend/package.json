@@ -19,32 +19,28 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "socket.io-client": "^4.6.1",
-    "zod": "^3.22.4",
-    "dompurify": "^3.0.8",
-    "react-window": "^1.8.10"
+    "socket.io-client": "^4.6.1"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.5.1",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
-    "@types/dompurify": "^3.0.5",
-    "@types/react-window": "^1.8.8",
-    "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.3.3",
-    "vite": "^5.0.8",
-    "vitest": "^1.1.0",
-    "@vitest/ui": "^1.1.0",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/jest-dom": "^6.1.5",
-    "@testing-library/user-event": "^14.5.1",
-    "jsdom": "^23.0.1",
-    "msw": "^2.0.11",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/parser": "^8.71.2",
+    "@vitejs/plugin-react": "^5.2.0",
+    "@vitest/coverage-v8": "^4.1.12",
+    "@vitest/ui": "^4.1.12",
     "eslint": "^8.56.0",
-    "@typescript-eslint/eslint-plugin": "^6.17.0",
-    "@typescript-eslint/parser": "^6.17.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-jsx-a11y": "^6.8.0",
-    "prettier": "^3.1.1"
+    "jsdom": "^23.0.1",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "vite": "^7.3.7",
+    "vitest": "^4.1.12"
   }
 }

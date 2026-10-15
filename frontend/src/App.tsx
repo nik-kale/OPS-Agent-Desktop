@@ -9,13 +9,8 @@ function App() {
   const [currentMissionId, setCurrentMissionId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const {
-    mission,
-    latestScreenshot,
-    error,
-    connectionStatus,
-    isUsingPolling,
-  } = useMission(currentMissionId);
+  const { mission, latestScreenshot, error, connectionStatus, isUsingPolling } =
+    useMission(currentMissionId);
 
   const handleSubmitMission = useCallback(async (prompt: string) => {
     setIsSubmitting(true);
@@ -35,9 +30,7 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <h1>🚀 Ops-Agent-Desktop</h1>
-          <p className="subtitle">
-            Visual Mission Control for AI-Powered SRE & Support Agents
-          </p>
+          <p className="subtitle">Visual Mission Control for AI-Powered SRE & Support Agents</p>
         </div>
       </header>
 

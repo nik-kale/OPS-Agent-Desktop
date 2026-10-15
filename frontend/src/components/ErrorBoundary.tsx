@@ -63,15 +63,13 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="error-icon">⚠️</div>
             <h1>Something Went Wrong</h1>
             <p className="error-message">
-              The application encountered an unexpected error and couldn't continue.
+              The application encountered an unexpected error and couldn&apos;t continue.
             </p>
 
             {this.state.error && (
               <div className="error-details">
                 <h3>Error Details:</h3>
-                <pre className="error-stack">
-                  {this.state.error.toString()}
-                </pre>
+                <pre className="error-stack">{this.state.error.toString()}</pre>
               </div>
             )}
 
@@ -84,7 +82,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </button>
             </div>
 
-            {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+            {import.meta.env.DEV && this.state.errorInfo && (
               <details className="error-stack-trace">
                 <summary>Component Stack Trace (Development Only)</summary>
                 <pre>{this.state.errorInfo.componentStack}</pre>
@@ -98,4 +96,3 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-

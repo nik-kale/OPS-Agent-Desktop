@@ -16,11 +16,7 @@ export const LiveView = memo(function LiveView({ mission, latestScreenshot }: Li
 
       <div className="screenshot-container">
         {latestScreenshot ? (
-          <img
-            src={latestScreenshot}
-            alt="Agent browser view"
-            className="screenshot"
-          />
+          <img src={latestScreenshot} alt="Agent browser view" className="screenshot" />
         ) : (
           <div className="screenshot-placeholder">
             <div className="placeholder-icon">🖥️</div>

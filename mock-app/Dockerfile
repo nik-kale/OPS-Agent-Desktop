@@ -1,24 +1,20 @@
 # Multi-stage build for Mock Ops Dashboard
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 # Install dependencies
 FROM base AS deps
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json ./
 COPY mock-app/package.json ./mock-app/
 
 RUN npm ci --workspace=mock-app
 
-# Build application
-FROM base AS builder
+# Build application (npm workspaces hoist dependencies into /app/node_modules)
+FROM deps AS builder
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/mock-app/node_modules ./mock-app/node_modules
-
 COPY mock-app ./mock-app
-COPY package.json ./
 
 WORKDIR /app/mock-app
 RUN npm run build

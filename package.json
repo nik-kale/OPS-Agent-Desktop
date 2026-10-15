@@ -24,14 +24,13 @@
     "lint:fix": "npm run lint:fix --workspace=backend && npm run lint:fix --workspace=frontend",
     "format": "npm run format --workspace=backend && npm run format --workspace=frontend",
     "type-check": "npm run type-check --workspace=backend && npm run type-check --workspace=frontend",
-    "prepare": "husky install"
+    "prepare": "node -e \"try { require('husky').install() } catch (e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "typescript": "^5.3.3",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
-    "turbo": "^1.11.3"
+    "lint-staged": "^17.6.0",
+    "typescript": "^5.3.3"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
