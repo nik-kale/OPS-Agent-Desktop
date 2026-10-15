@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Boolean settings such as `BROWSER_HEADLESS=false` were read as `true`; they now accept `true`/`false`/`1`/`0` and reject anything else.
+- The backend no longer refuses to start when `ALLOWED_DASHBOARD_DOMAINS` or `ALLOWED_ORIGINS` is unset, and list settings ignore spaces around commas.
+- Debug-level database logging no longer writes query parameters, which included password hashes and refresh tokens.
+- A `"__proto__"` key in a JSON request body can no longer add inherited properties to `req.body`.
+- Mission prompts are trimmed and limited to 5000 characters.
+- Refresh tokens are stored with the lifetime set by `REFRESH_TOKEN_EXPIRATION` (previously always 7 days), and two logins in the same second no longer collide on the same token.
+- The frontend now falls back to polling when the WebSocket connection fails, and reconnect events are read from the Socket.IO manager.
+- The backend, frontend and mock-app Docker images build again; the backend image is Debian-based so Playwright's Chromium can run.
+
+### Changed
+
+- Node.js 22 is required (CI and Docker images use it); Vite 7, Vitest 4, bcrypt 6 and typescript-eslint 8.
+- `package-lock.json` is committed, and unused dependencies (BullMQ, ioredis, sharp, OpenTelemetry, the Anthropic and OpenAI SDKs, prom-client, swagger-ui-express, zod/dompurify/react-window in the frontend, turbo) are removed. `npm audit` reports no vulnerabilities.
+- The README states which features are wired into the running server on `main`.
+
 ## [2.1.0] - 2025-12-26
 
 ### ✨ Quality & Performance Update

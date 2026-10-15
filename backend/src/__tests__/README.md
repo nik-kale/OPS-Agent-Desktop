@@ -38,13 +38,11 @@ This directory contains the comprehensive test suite for the OPS-Agent-Desktop b
 
 ### API Routes Tests (`api/routes.test.ts`)
 
-- **Coverage**: End-to-end API endpoint testing
+- **Coverage**: The mission endpoints served by `src/index.ts` (create, fetch, stream, list)
 - **Security Focus**:
-  - Authentication requirements
-  - Authorization checks
-  - User data scoping
-  - Admin privilege escalation
-- **Test Count**: 20+ tests
+  - Prompt validation and length limit
+- **Note**: The mission routes are not authenticated on `main`; route-level auth lives on the unmerged `security/add-api-authentication` branch
+- **Test Count**: 14 tests
 
 ## Running Tests
 
@@ -167,11 +165,11 @@ vi.mock('../db/client', () => ({
 ### Tests not running
 
 - Ensure `vitest` is installed: `npm install`
-- Check Node version: `node -v` (requires v18+)
+- Check Node version: `node -v` (requires v22+)
 
 ### Coverage not generating
 
-- Install coverage provider: `npm install -D @vitest/coverage-v8`
+- `@vitest/coverage-v8` is a devDependency; run `npm install` from the repository root
 
 ### Mocks not working
 

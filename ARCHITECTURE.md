@@ -123,7 +123,7 @@ OPS-Agent-Desktop v2.0 is a production-ready platform for AI-powered autonomous 
 
 | Component      | Technology                 | Purpose                    |
 | -------------- | -------------------------- | -------------------------- |
-| **Runtime**    | Node.js 18+                | JavaScript runtime         |
+| **Runtime**    | Node.js 22+                | JavaScript runtime         |
 | **Framework**  | Express 4.18               | Web server                 |
 | **Language**   | TypeScript 5.3             | Type-safe development      |
 | **Database**   | PostgreSQL 16              | Primary data store         |

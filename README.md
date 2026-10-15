@@ -29,6 +29,16 @@
 
 **📖 [Upgrade Guide](UPGRADE_GUIDE.md)** | **🏗️ [Architecture Docs](ARCHITECTURE.md)** | **📋 [Changelog](CHANGELOG.md)**
 
+### Implementation status on `main`
+
+Several of the features above were built on branches that have not been merged, or exist as modules the server does not load yet. What the running server does today:
+
+- **Wired in** (`backend/src/index.ts`): the mission API, the security middleware (Helmet, CORS allow-list, rate limiting, input sanitization), the Playwright browser agent and an in-memory mission store. The frontend follows a mission by HTTP polling.
+- **In the codebase, not wired in**: the Prisma schema and mission repository (missions live in memory and are lost on restart), the JWT auth service and middleware (the mission routes do not require authentication), the Socket.IO server (never started, so the frontend always polls) and the OpenAPI definition in `backend/src/config/swagger.ts` (not served).
+- **Not on `main`**: the BullMQ mission queue and queue API (`feat/concurrent-mission-queue`) and route-level authentication (`security/add-api-authentication`).
+
+The test suite covers the API routes, auth service, auth and security middleware, configuration, database logging and the frontend's mission hook.
+
 ---
 
 ## What This Is
@@ -173,7 +183,7 @@ Built to plug into:
 
 ### Prerequisites
 
-- **Node.js** 18+ and **npm** (or pnpm/yarn)
+- **Node.js** 22+ and **npm** (the build tooling needs Node 20.19+; CI and the Docker images use 22)
 - **Playwright** browsers (will be installed automatically)
 
 ### Installation
@@ -425,14 +435,14 @@ Response: 200 OK
 
 ### Performance Metrics
 
-| Capability                | Metric                                    |
-| ------------------------- | ----------------------------------------- |
-| **Concurrent Missions**   | 3 simultaneous executions                 |
-| **Queue Throughput**      | 300% vs sequential                        |
-| **Retry Logic**           | 3 attempts, exponential backoff           |
-| **Rate Limiting**         | 100 req/15min (general), 10 missions/hour |
-| **Component Performance** | 90% fewer re-renders                      |
-| **Test Coverage**         | 80+ tests, 60%+ coverage                  |
+| Capability                | Metric                                  |
+| ------------------------- | --------------------------------------- |
+| **Concurrent Missions**   | 3 simultaneous executions               |
+| **Queue Throughput**      | 300% vs sequential                      |
+| **Retry Logic**           | 3 attempts, exponential backoff         |
+| **Rate Limiting**         | 100 req/min (general), 10 missions/hour |
+| **Component Performance** | 90% fewer re-renders                    |
+| **Test Coverage**         | 80+ tests, 60%+ coverage                |
 
 ---
 
