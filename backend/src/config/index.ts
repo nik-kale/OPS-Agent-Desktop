@@ -18,6 +18,27 @@ const tokenLifetime = (fallback: string) =>
     .default(fallback)
     .transform((value) => value as NonNullable<SignOptions['expiresIn']>);
 
+// z.coerce.boolean() is Boolean(value), which turns the string "false" into true.
+const envBoolean = (fallback: boolean) =>
+  z
+    .preprocess(
+      (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value),
+      z.enum(['true', 'false', '1', '0']).optional()
+    )
+    .transform((value) => (value === undefined ? fallback : value === 'true' || value === '1'));
+
+// Comma-separated list; entries are trimmed and blanks dropped.
+const envList = (fallback: string) =>
+  z
+    .string()
+    .default(fallback)
+    .transform((value) =>
+      value
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0)
+    );
+
 const configSchema = z.object({
   // Server
   nodeEnv: z.enum(['development', 'production', 'test']).default('development'),
@@ -34,7 +55,7 @@ const configSchema = z.object({
   refreshTokenExpiration: tokenLifetime('7d'),
 
   // CORS
-  allowedOrigins: z.string().transform((val) => val.split(',')),
+  allowedOrigins: envList('http://localhost:5173'),
 
   // Storage
   storageType: z.enum(['local', 's3', 'minio']).default('local'),
@@ -50,13 +71,13 @@ const configSchema = z.object({
   redisPassword: z.string().optional(),
 
   // Browser Agent
-  browserHeadless: z.coerce.boolean().default(true),
+  browserHeadless: envBoolean(true),
   browserPoolSize: z.coerce.number().default(5),
   maxConcurrentMissions: z.coerce.number().default(3),
   missionTimeoutMs: z.coerce.number().default(300000),
 
   // Dashboard
-  allowedDashboardDomains: z.string().transform((val) => val.split(',')),
+  allowedDashboardDomains: envList('localhost:5174'),
 
   // External Integrations
   autorcaCoreUrl: z.string().url().optional(),
@@ -71,7 +92,7 @@ const configSchema = z.object({
 
   // Observability
   logLevel: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
-  enableTelemetry: z.coerce.boolean().default(true),
+  enableTelemetry: envBoolean(true),
   otelExporterEndpoint: z.string().optional(),
 
   // Rate Limiting
@@ -80,10 +101,10 @@ const configSchema = z.object({
   missionRateLimitPerHour: z.coerce.number().default(10),
 
   // Feature Flags
-  enableWebsocket: z.coerce.boolean().default(true),
-  enableMultiMission: z.coerce.boolean().default(true),
-  enableLlmPlanning: z.coerce.boolean().default(false),
-  enableAutoApproval: z.coerce.boolean().default(false),
+  enableWebsocket: envBoolean(true),
+  enableMultiMission: envBoolean(true),
+  enableLlmPlanning: envBoolean(false),
+  enableAutoApproval: envBoolean(false),
 });
 
 // Parse and validate environment variables
